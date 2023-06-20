@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+const int N = 1; // # of pieces
+
+chan move;
+
+</declaration>
+	<template>
+		<name>Controller</name>
+		<declaration>const int tot_segments = 5; // # of segments in the conveyor belt +1
+bool belt[tot_segments] = {1,0,0,0,0}; // # 1 if piece on segment, 0 otherwise
+
+void shift() { 
+
+    int i;
+    bool temp = belt[tot_segments-1];
+    for (i = tot_segments-1; i &gt; 0; i--){
+        belt[i] = belt[i-1];
+    }    
+    belt[0] = temp;
+
+}</declaration>
+		<location id="id0" x="-59" y="-17">
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-195" y="-51">move?</label>
+			<label kind="assignment" x="-195" y="-34">shift()</label>
+			<nail x="-119" y="-68"/>
+			<nail x="-119" y="34"/>
+		</transition>
+	</template>
+	<template>
+		<name x="9" y="9">Conveyor_Belt</name>
+		<declaration>// Place local declarations here.
+clock x;
+
+
+</declaration>
+		<location id="id1" x="0" y="0">
+		</location>
+		<init ref="id1"/>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-238" y="-42">x&gt;=1</label>
+			<label kind="synchronisation" x="-238" y="25">move!</label>
+			<label kind="assignment" x="-238" y="-8">x=0</label>
+			<nail x="-187" y="9"/>
+			<nail x="-187" y="-42"/>
+		</transition>
+	</template>
+	<system>system Conveyor_Belt, Controller;</system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
