@@ -4,6 +4,12 @@
 	<declaration>// Place global declarations here.
 const int N = 1; // # of pieces
 
+/*const int num_stations = 6;
+typedef int[0, num_station-1] id_s;
+
+const int num_sensors = num_stations*2;
+typedef int[0, num_sensors-1] id_sen;*/
+
 chan move;
 
 </declaration>
@@ -36,37 +42,133 @@ void shift() {
 	</template>
 	<template>
 		<name>Processing_Station</name>
+		<declaration>//nelle dichiarazioni globali ci passiamo al processo della stazione l'id della stazione corrente e l'id della precedente tramite i parameters
+clock x;
+
+int queue[5] = {0,0,0,0,0}
+
+
+void enqueue(){
+    
+}
+
+void dequeue(){
+
+}
+
+void shift(){
+    
+} 
+
+bool check_queue(){
+}</declaration>
 		<location id="id1" x="0" y="0">
+			<name x="25" y="-17">free</name>
+		</location>
+		<location id="id2" x="-238" y="51">
+			<name x="-246" y="68">wait</name>
+		</location>
+		<location id="id3" x="-255" y="-119">
+			<name x="-265" y="-153">processing</name>
+			<label kind="invariant" x="-331" y="-136">x &lt;= 20</label>
 		</location>
 		<init ref="id1"/>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="42" y="85">free_insensor?</label>
+			<label kind="assignment" x="42" y="102">enqueue()</label>
+			<nail x="0" y="119"/>
+			<nail x="85" y="59"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-170" y="42">free_outsensor?</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-476" y="-25">check_queue() == 0 &amp;&amp; x &gt; 20</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="guard" x="85" y="-221">check_queue()==1 &amp;&amp; x &gt; 20</label>
+			<nail x="93" y="-195"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-153" y="-110">approaching?</label>
+			<label kind="assignment" x="-153" y="-93">shift()</label>
+		</transition>
 	</template>
 	<template>
 		<name x="9" y="9">Conveyor_Belt</name>
 		<declaration>// Place local declarations here.
 clock x;
-
-
 </declaration>
-		<location id="id2" x="0" y="0">
+		<location id="id4" x="-1343" y="-170">
+			<name x="-1353" y="-204">conf1</name>
 		</location>
-		<init ref="id2"/>
+		<location id="id5" x="-1122" y="-119">
+			<name x="-1132" y="-153">conf2</name>
+		</location>
+		<init ref="id4"/>
 		<transition>
-			<source ref="id2"/>
-			<target ref="id2"/>
-			<label kind="guard" x="-238" y="-42">x&gt;=1</label>
-			<label kind="synchronisation" x="-238" y="25">move!</label>
-			<label kind="assignment" x="-238" y="-8">x=0</label>
-			<nail x="-187" y="9"/>
-			<nail x="-187" y="-42"/>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-1232" y="-110">x&gt;3</label>
+			<label kind="assignment" x="-1241" y="-93">x=0</label>
+			<nail x="-1241" y="-59"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-994" y="-119">x&gt;=0 &amp;&amp; x&lt;=3</label>
+			<label kind="synchronisation" x="-994" y="-102">move!</label>
+			<label kind="assignment" x="-994" y="-85">x=0</label>
+			<nail x="-1011" y="-127"/>
+			<nail x="-1011" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-1241" y="-178">x&gt;3</label>
+			<label kind="assignment" x="-1241" y="-195">x=0</label>
+			<nail x="-1266" y="-153"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-1589" y="-238">x&gt;=0 &amp;&amp; x&lt;=3</label>
+			<label kind="synchronisation" x="-1589" y="-221">move!</label>
+			<label kind="assignment" x="-1581" y="-204">x=0</label>
+			<nail x="-1530" y="-161"/>
+			<nail x="-1530" y="-212"/>
 		</transition>
 	</template>
 	<template>
 		<name>Sensor</name>
-		<location id="id3" x="0" y="0">
+		<declaration>//free_sensor e approaching in triggherati da sensor</declaration>
+		<location id="id6" x="0" y="0">
 		</location>
-		<init ref="id3"/>
+		<init ref="id6"/>
 	</template>
-	<system>system Conveyor_Belt, Controller;</system>
+	<system>/*station1 = Processing_Station(1);
+station2 = Processing_Station(2);
+station3 = Processing_Station(3);
+in_sensor1 = Sensor(1);
+out_sensor1 = Sensor(2);
+in_sensor2 = Sensor(3);
+out_sensor2 = Sensor(4);
+in_sensor3 = Sensor(5);
+out_sensor3 = Sensor(6);*/
+controller = Controller();
+belt = Conveyor_Belt();
+
+system belt, controller;</system>
 	<queries>
 		<query>
 			<formula></formula>
