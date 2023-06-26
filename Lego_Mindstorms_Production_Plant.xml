@@ -2,13 +2,13 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
-const int N = 1; // # of pieces
+const int NUM_PIECES = 4; //non so se posso usare le #define
+const int NUM_STATIONS = 3;
+const int NUM_SENSORS = NUM_STATIONS*2;
+const int NUM_SLOTS = 20;
 
-const int num_stations = 6;
-typedef int[0, num_station-1] id_s;
-
-/*const int num_sensors = num_stations*2;
-typedef int[0, num_sensors-1] id_sen;*/
+typedef int[0, NUM_STATIONS-1] id_s;
+typedef int[0, NUM_SENSORS-1] id_sen;
 
 // dichiare la belt (array di bool)
 
@@ -18,7 +18,17 @@ chan move;
 	<template>
 		<name>Init</name>
 		<declaration>void init(){
-//setta la belt
+   
+    bool belt[NUM_SLOTS]; //non se se mi inizializza tutto a zero, in caso for loop
+    bool sensor_in[NUM_SLOTS];
+    bool sensor_out[NUM_SLOTS];
+    bool station[NUM_SLOTS];
+    
+    //mette i pezzi sulla belt
+    for(int i = 0; i &lt; NUM_PIECES; i++){
+        belt[i] = 1;
+    }
+    
 }</declaration>
 		<location id="id0" x="-229" y="-8">
 			<committed/>
@@ -35,18 +45,23 @@ chan move;
 	</template>
 	<template>
 		<name>Controller</name>
-		<declaration>const int tot_segments = 5; // # of segments in the conveyor belt +1
-bool belt[tot_segments] = {1,0,0,0,0}; // # 1 if piece on segment, 0 otherwise
+		<declaration>int shift() { 
 
-void shift() { 
+    int[0,4] temp = belt[NUM_SLOTS-1];
+    for (int i = NUM_SLOTS-1; i &gt; 0; i--){
+        next = i+1;
+        if(!belt[next] &amp;&amp; !station[next] &amp;&amp; !sensor_in[next] &amp;&amp; !sensor_out[next]){
+            belt[i] = belt[i-1];
+        }else if(station[next]){
+            
+        }else if(sensor_in[next]){
+           
+        }else if(sensor_out[next]){
 
-    int i;
-    bool temp = belt[tot_segments-1];
-    for (i = tot_segments-1; i &gt; 0; i--){
-        belt[i] = belt[i-1];
+        }else continue;
     }    
     belt[0] = temp;
-
+    return 0;
 }</declaration>
 		<location id="id2" x="-59" y="-17">
 		</location>
@@ -195,13 +210,13 @@ clock x;
 		<location id="id13" x="-134" y="119">
 			<name x="-153" y="127">busy</name>
 		</location>
-		<location id="id14" x="-272" y="-34">
-		</location>
 		<init ref="id11"/>
 		<transition>
 			<source ref="id11"/>
-			<target ref="id14"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="-68" y="-93">init?</label>
 			<nail x="-136" y="-110"/>
+			<nail x="-195" y="-51"/>
 		</transition>
 		<transition>
 			<source ref="id13"/>
