@@ -2,30 +2,41 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
-const int NUM_PIECES = 4; //non so se posso usare le #define
+const int NUM_PIECES = 4; 
 const int NUM_STATIONS = 3;
-const int NUM_SENSORS = NUM_STATIONS*2;
+const int NUM_IN_SENSORS = 3;
+const int NUM_OUT_SENSORS = 3;
 const int NUM_SLOTS = 20;
 
 typedef int[0, NUM_STATIONS-1] id_s;
-typedef int[0, NUM_SENSORS-1] id_sen;
+typedef int[0, NUM_IN_SENSORS-1] id_in_sen;
+typedef int[0, NUM_OUT_SENSORS-1] id_out_sen;
 
-// dichiare la belt (array di bool)
+bool belt[NUM_SLOTS];
+int stations[NUM_SLOTS];
+int in_sensors[NUM_SLOTS];
+int out_sensors[NUM_SLOTS];
+
+bool activated_in_sensors[NUM_IN_SENSORS];
+bool activated_out_sensors[NUM_OUT_SENSORS];
+bool activated_stations[NUM_STATIONS];
+bool ready_to_go[NUM_STATIONS];
+
 
 chan move;
 
 </declaration>
 	<template>
 		<name>Init</name>
-		<declaration>void init(){
+		<declaration>void initialize() {
    
     bool belt[NUM_SLOTS]; //non se se mi inizializza tutto a zero, in caso for loop
     bool sensor_in[NUM_SLOTS];
     bool sensor_out[NUM_SLOTS];
     bool station[NUM_SLOTS];
-    
-    //mette i pezzi sulla belt
-    for(int i = 0; i &lt; NUM_PIECES; i++){
+    int i;
+
+    for(i = 0; i &lt; NUM_PIECES; i++){
         belt[i] = 1;
     }
     
@@ -45,41 +56,91 @@ chan move;
 	</template>
 	<template>
 		<name>Controller</name>
-		<declaration>int shift() { 
+		<declaration>void shift() {
+    int next, i;
 
-    int[0,4] temp = belt[NUM_SLOTS-1];
-    for (int i = NUM_SLOTS-1; i &gt; 0; i--){
-        next = i+1;
-        if(!belt[next] &amp;&amp; !station[next] &amp;&amp; !sensor_in[next] &amp;&amp; !sensor_out[next]){
-            belt[i] = belt[i-1];
-        }else if(station[next]){
-            
-        }else if(sensor_in[next]){
-           
-        }else if(sensor_out[next]){
-
-        }else continue;
+    // FIXME: non copriamo il caso in cui il sensore di out è esattamente dopo la stazione e il caso in cui due sensori sono di seguito
+    bool temp = belt[NUM_SLOTS-1];
+    for (i = NUM_SLOTS-1; i &gt; 0; i--){
+        if (belt[i-1] &amp;&amp; !belt[i]){
+            next = i;
+            if (stations[next] &gt; 0){
+                if (!activated_stations[stations[next]-1]) {
+                    belt[i] = belt[i-1];
+                    belt[i-1] = false;
+                    activated_stations[stations[next]-1] = true;     
+                    if (in_sensors[i-1] &gt; 0){
+                        activated_in_sensors[in_sensors[i-1]] = false;
+                    }
+                }
+            } else if (in_sensors[next] &gt; 0){
+                if (!activated_in_sensors[in_sensors[next]-1]) {
+                    belt[i] = belt[i-1];
+                    belt[i-1] = false;
+                    activated_in_sensors[in_sensors[next]-1] = true;                    
+                }    
+            } else if (out_sensors[next] &gt; 0){
+                if (!activated_out_sensors[out_sensors[next]-1]) {
+                    belt[i] = belt[i-1]; 
+                    belt[i-1] = false;
+                    activated_out_sensors[out_sensors[next]-1] = true;                    
+                } 
+            } else if (stations[i-1] &amp;&amp; activated_stations[stations[i-1]-1] &amp;&amp; ready_to_go[stations[i-1]-1] &amp;&amp; !activated_out_sensors[stations[i-1]]){
+                belt[i] = belt[i-1];
+                belt[i-1] = false;
+                activated_stations[stations[i-1]-1] = false;
+                ready_to_go[stations[i-1]-1] = false;
+            } else if (out_sensors[i-1] &gt; 0) {
+                belt[i] = belt[i-1];
+                belt[i-1] = false;
+                activated_out_sensors[out_sensors[i-1]-1] = false;     
+            } else if (in_sensors[i-1] &gt; 0) {
+                belt[i] = belt[i-1];
+                belt[i-1] = false;
+                activated_in_sensors[in_sensors[i-1]-1] = false;     
+            } else if (!belt[next] &amp;&amp; (stations[next] == 0) &amp;&amp; (in_sensors[next] == 0) &amp;&amp; (out_sensors[next] == 0)){
+                belt[i] = belt[i-1];
+                belt[i-1] = false;
+            }
+        }
     }    
     belt[0] = temp;
-    return 0;
 }</declaration>
-		<location id="id2" x="-59" y="-17">
+		<location id="id2" x="-501" y="-229">
 		</location>
-		<location id="id3" x="-8" y="-170">
+		<location id="id3" x="-637" y="-229">
+		</location>
+		<location id="id4" x="-365" y="-229">
+		</location>
+		<location id="id5" x="-246" y="-229">
+		</location>
+		<location id="id6" x="-119" y="-229">
+		</location>
+		<location id="id7" x="8" y="-229">
 		</location>
 		<init ref="id3"/>
 		<transition>
-			<source ref="id3"/>
-			<target ref="id2"/>
-			<label kind="synchronisation" x="-17" y="-102">init?</label>
+			<source ref="id6"/>
+			<target ref="id7"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
 		</transition>
 		<transition>
 			<source ref="id2"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-459" y="-263">move?</label>
+			<label kind="assignment" x="-459" y="-246">shift()</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
 			<target ref="id2"/>
-			<label kind="synchronisation" x="-195" y="-51">move?</label>
-			<label kind="assignment" x="-195" y="-34">shift()</label>
-			<nail x="-119" y="-68"/>
-			<nail x="-119" y="34"/>
+			<label kind="synchronisation" x="-578" y="-255">init?</label>
 		</transition>
 	</template>
 	<template>
@@ -89,60 +150,44 @@ chan move;
 //precedente tramite i parameters
 clock x;
 
-
-void enqueue(){
-
-}
-
-void dequeue(){
-
-}
-
-void shift(){
-    
-} 
-
-bool check_queue(){
+void ready_to_go(id_s id){
+    ready_to_go[id-1] = true;
 }</declaration>
-		<location id="id4" x="0" y="0">
-			<name x="25" y="-17">free</name>
+		<location id="id8" x="-67" y="-102">
+			<name x="-85" y="-85">free</name>
 		</location>
-		<location id="id5" x="-238" y="51">
-			<name x="-246" y="68">wait</name>
+		<location id="id9" x="68" y="-102">
 		</location>
-		<location id="id6" x="-255" y="-119">
-			<name x="-289" y="-161">processing</name>
-			<label kind="invariant" x="-331" y="-136">x &lt;= 20</label>
+		<location id="id10" x="-314" y="-102">
+			<name x="-356" y="-85">preprocessing</name>
 		</location>
-		<location id="id7" x="68" y="-102">
+		<location id="id11" x="-578" y="-102">
+			<name x="-612" y="-85">processing</name>
 		</location>
-		<init ref="id7"/>
+		<location id="id12" x="-314" y="-229">
+			<name x="-331" y="-263">wait</name>
+		</location>
+		<init ref="id9"/>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id4"/>
-			<label kind="synchronisation" x="42" y="-68">init?</label>
+			<source ref="id12"/>
+			<target ref="id8"/>
 		</transition>
 		<transition>
-			<source ref="id5"/>
-			<target ref="id4"/>
-			<label kind="synchronisation" x="-170" y="42">free_outsensor?</label>
+			<source ref="id11"/>
+			<target ref="id12"/>
 		</transition>
 		<transition>
-			<source ref="id6"/>
-			<target ref="id5"/>
-			<label kind="guard" x="-476" y="-25">check_queue() == 0 &amp;&amp; x &gt; 20</label>
+			<source ref="id10"/>
+			<target ref="id11"/>
 		</transition>
 		<transition>
-			<source ref="id6"/>
-			<target ref="id4"/>
-			<label kind="guard" x="-42" y="-230">check_queue()==1 &amp;&amp; x &gt; 20</label>
-			<nail x="-59" y="-195"/>
+			<source ref="id8"/>
+			<target ref="id10"/>
 		</transition>
 		<transition>
-			<source ref="id4"/>
-			<target ref="id6"/>
-			<label kind="guard" x="-187" y="-119">check_insensor()==1</label>
-			<label kind="synchronisation" x="-187" y="-102">move?</label>
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-8" y="-127">init?</label>
 		</transition>
 	</template>
 	<template>
@@ -152,30 +197,30 @@ clock x;
 
 // implementare la shift sull'array globale
 </declaration>
-		<location id="id8" x="-1343" y="-170">
+		<location id="id13" x="-1343" y="-170">
 			<name x="-1326" y="-212">conf1</name>
 		</location>
-		<location id="id9" x="-1122" y="-119">
+		<location id="id14" x="-1122" y="-119">
 			<name x="-1132" y="-153">conf2</name>
 		</location>
-		<location id="id10" x="-1368" y="-340">
+		<location id="id15" x="-1368" y="-340">
 		</location>
-		<init ref="id10"/>
+		<init ref="id15"/>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id8"/>
+			<source ref="id15"/>
+			<target ref="id13"/>
 			<label kind="synchronisation" x="-1351" y="-297">init?</label>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id8"/>
+			<source ref="id14"/>
+			<target ref="id13"/>
 			<label kind="guard" x="-1232" y="-110">x&gt;3</label>
 			<label kind="assignment" x="-1241" y="-93">x=0</label>
 			<nail x="-1241" y="-59"/>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id9"/>
+			<source ref="id14"/>
+			<target ref="id14"/>
 			<label kind="guard" x="-994" y="-119">x&gt;=0 &amp;&amp; x&lt;=3</label>
 			<label kind="synchronisation" x="-994" y="-102">move!</label>
 			<label kind="assignment" x="-994" y="-85">x=0</label>
@@ -183,15 +228,15 @@ clock x;
 			<nail x="-1011" y="-34"/>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id9"/>
+			<source ref="id13"/>
+			<target ref="id14"/>
 			<label kind="guard" x="-1241" y="-178">x&gt;3</label>
 			<label kind="assignment" x="-1241" y="-195">x=0</label>
 			<nail x="-1266" y="-153"/>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id8"/>
+			<source ref="id13"/>
+			<target ref="id13"/>
 			<label kind="guard" x="-1615" y="-238">x&gt;=0 &amp;&amp; x&lt;=3</label>
 			<label kind="synchronisation" x="-1589" y="-221">move!</label>
 			<label kind="assignment" x="-1606" y="-204">x=0, shift()</label>
@@ -202,30 +247,30 @@ clock x;
 	<template>
 		<name>Sensor</name>
 		<declaration>//free_sensor e approaching in triggherati da sensor</declaration>
-		<location id="id11" x="0" y="0">
+		<location id="id16" x="0" y="0">
 		</location>
-		<location id="id12" x="-127" y="8">
+		<location id="id17" x="-127" y="8">
 			<name x="-137" y="-26">free</name>
 		</location>
-		<location id="id13" x="-134" y="119">
+		<location id="id18" x="-134" y="119">
 			<name x="-153" y="127">busy</name>
 		</location>
-		<init ref="id11"/>
+		<init ref="id16"/>
 		<transition>
-			<source ref="id11"/>
-			<target ref="id12"/>
+			<source ref="id16"/>
+			<target ref="id17"/>
 			<label kind="synchronisation" x="-68" y="-93">init?</label>
 			<nail x="-136" y="-110"/>
 			<nail x="-195" y="-51"/>
 		</transition>
 		<transition>
-			<source ref="id13"/>
-			<target ref="id12"/>
+			<source ref="id18"/>
+			<target ref="id17"/>
 			<nail x="-204" y="51"/>
 		</transition>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id13"/>
+			<source ref="id17"/>
+			<target ref="id18"/>
 			<label kind="synchronisation" x="-127" y="51">insensor!</label>
 		</transition>
 	</template>
