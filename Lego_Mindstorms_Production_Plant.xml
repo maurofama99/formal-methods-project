@@ -2,43 +2,66 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
-const int NUM_PIECES = 4; 
-const int NUM_STATIONS = 3;
-const int NUM_IN_SENSORS = 3;
-const int NUM_OUT_SENSORS = 3;
-const int NUM_SLOTS = 20;
+const int NUM_PIECES = 3; 
+const int NUM_STATIONS = 4;
+const int NUM_IN_SENSORS = 4;
+const int NUM_OUT_SENSORS = 4;
+const int NUM_SLOTS = 95;
 
 typedef int[0, NUM_STATIONS-1] id_s;
-typedef int[0, NUM_IN_SENSORS-1] id_in_sen;
-typedef int[0, NUM_OUT_SENSORS-1] id_out_sen;
 
 bool belt[NUM_SLOTS];
 int stations[NUM_SLOTS];
 int in_sensors[NUM_SLOTS];
 int out_sensors[NUM_SLOTS];
+int preprocessing[NUM_SLOTS];
 
-bool activated_in_sensors[NUM_IN_SENSORS];
-bool activated_out_sensors[NUM_OUT_SENSORS];
-bool activated_stations[NUM_STATIONS];
-bool ready_to_go[NUM_STATIONS];
+bool status_in_sensors[NUM_IN_SENSORS];
+bool status_stations[NUM_STATIONS];
+bool status_preprocessing[NUM_STATIONS];
 
+chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS];
+broadcast chan initializer, in_sensor;
 
-chan move;
+int max_len_queue[NUM_STATIONS];
+int len_queue[NUM_STATIONS];
 
 </declaration>
 	<template>
-		<name>Init</name>
+		<name>Initialization</name>
 		<declaration>void initialize() {
-   
-    bool belt[NUM_SLOTS]; //non se se mi inizializza tutto a zero, in caso for loop
-    bool sensor_in[NUM_SLOTS];
-    bool sensor_out[NUM_SLOTS];
-    bool station[NUM_SLOTS];
+
     int i;
 
-    for(i = 0; i &lt; NUM_PIECES; i++){
+    out_sensors[81] = 1;
+    in_sensors[94] = 1;
+    stations[2] = 1;
+    max_len_queue[0] = 13;
+    out_sensors[9] = 2;
+    in_sensors[19] = 2;
+    stations[23] = 2;
+    max_len_queue[1] = 10;
+    out_sensors[53] = 3;
+    in_sensors[62] = 3;
+    stations[66] = 3;
+    max_len_queue[2] = 9;
+    out_sensors[74] = 4;
+    in_sensors[76] = 4;
+    stations[78] = 4;
+    max_len_queue[3] = 2;
+
+    for(i = 23; i &lt; 23 + NUM_PIECES; i++){
         belt[i] = 1;
     }
+
+    for (i=0; i&lt; NUM_STATIONS;i++){
+        status_stations[i] = 0;
+        status_in_sensors[i] = 0;
+        status_preprocessing[i] = 0;
+        len_queue[i] = 0;
+    }
+
+
     
 }</declaration>
 		<location id="id0" x="-229" y="-8">
@@ -50,243 +73,236 @@ chan move;
 		<transition>
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<label kind="synchronisation" x="-170" y="-59">init!</label>
-			<label kind="assignment" x="-170" y="-42">init()</label>
+			<label kind="synchronisation" x="-170" y="-59">initializer!</label>
+			<label kind="assignment" x="-170" y="-42">initialize()</label>
 		</transition>
 	</template>
 	<template>
-		<name>Controller</name>
-		<declaration>void shift() {
+		<name>Processing_Station</name>
+		<parameter>const id_s id, const id_s next_id</parameter>
+		<declaration>clock y;
+
+int get_len_pre_processing() {
+    int i, station, sensor;
+    
+    for (i = 0; i &lt; NUM_SLOTS; i++) {
+        if (stations[i] == id) station = i;
+        if (in_sensors[i] == id) sensor = i;
+    }
+    if (sensor &gt; station) return NUM_SLOTS - sensor + station;
+    else return station-sensor;
+}
+
+int get_processing_time() {
+    return 5;
+}
+
+void enqueue() {
+    len_queue[id+1]++;
+}
+
+void dequeue() {
+    status_preprocessing[id] = 1;
+    len_queue[id]--;
+}
+
+void update_station_status(){
+    status_stations[id] = 1;
+}
+
+void update_status() {
+    status_stations[id] = 0;
+    status_preprocessing[id] = 0;
+    status_in_sensors[id] = 0;
+}
+
+</declaration>
+		<location id="id2" x="-637" y="-348">
+		</location>
+		<location id="id3" x="-484" y="-229">
+		</location>
+		<location id="id4" x="-229" y="-229">
+			<label kind="invariant" x="-323" y="-263">y &lt; get_len_pre_processing()</label>
+		</location>
+		<location id="id5" x="-102" y="-76">
+		</location>
+		<location id="id6" x="59" y="-229">
+			<label kind="invariant" x="85" y="-238">y &lt; get_processing_time()</label>
+		</location>
+		<init ref="id2"/>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-459" y="-68">len_queue[next_id] &lt; max_len_queue[next_id]</label>
+			<label kind="synchronisation" x="-459" y="-51">free_in_sensor[id]!</label>
+			<label kind="assignment" x="-459" y="-34">update_status()</label>
+			<nail x="-442" y="-76"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-42" y="-136">len_queue[next_id] == max_len_queue[next_id]</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-348" y="-433">len_queue[next_id] &lt; max_len_queue[next_id]</label>
+			<label kind="synchronisation" x="-348" y="-416">free_in_sensor[id]!</label>
+			<label kind="assignment" x="-348" y="-399">enqueue(), update_status()</label>
+			<nail x="-238" y="-382"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id6"/>
+			<label kind="assignment" x="-204" y="-221">y = 0, update_station_status()</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-433" y="-221">len_queue[id] &gt; 0</label>
+			<label kind="synchronisation" x="-433" y="-204">enter_preprocessing[id]?</label>
+			<label kind="assignment" x="-433" y="-187">y = 0, dequeue()</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-569" y="-323">initializer?</label>
+		</transition>
+	</template>
+	<template>
+		<name x="9" y="9">Conveyor_Belt</name>
+		<declaration>clock x;
+
+void shift() {
     int next, i;
 
-    // FIXME: non copriamo il caso in cui il sensore di out è esattamente dopo la stazione e il caso in cui due sensori sono di seguito
     bool temp = belt[NUM_SLOTS-1];
     for (i = NUM_SLOTS-1; i &gt; 0; i--){
         if (belt[i-1] &amp;&amp; !belt[i]){
             next = i;
             if (stations[next] &gt; 0){
-                if (!activated_stations[stations[next]-1]) {
+                if (!status_stations[stations[next]-1]) {
                     belt[i] = belt[i-1];
                     belt[i-1] = false;
-                    activated_stations[stations[next]-1] = true;     
-                    if (in_sensors[i-1] &gt; 0){
-                        activated_in_sensors[in_sensors[i-1]] = false;
-                    }
                 }
             } else if (in_sensors[next] &gt; 0){
-                if (!activated_in_sensors[in_sensors[next]-1]) {
+                if (!status_in_sensors[in_sensors[next]-1] &amp;&amp; !status_preprocessing[in_sensors[next]-1]) { //ho aggiunto se è anche nello stato di preprocessing controlare domani le condizioni
                     belt[i] = belt[i-1];
                     belt[i-1] = false;
-                    activated_in_sensors[in_sensors[next]-1] = true;                    
+                    status_in_sensors[in_sensors[next]-1] = 1;                    
                 }    
-            } else if (out_sensors[next] &gt; 0){
-                if (!activated_out_sensors[out_sensors[next]-1]) {
-                    belt[i] = belt[i-1]; 
-                    belt[i-1] = false;
-                    activated_out_sensors[out_sensors[next]-1] = true;                    
-                } 
-            } else if (stations[i-1] &amp;&amp; activated_stations[stations[i-1]-1] &amp;&amp; ready_to_go[stations[i-1]-1] &amp;&amp; !activated_out_sensors[stations[i-1]]){
+            } else if (stations[i-1] &amp;&amp; !status_stations[stations[i-1]-1]) {
                 belt[i] = belt[i-1];
                 belt[i-1] = false;
-                activated_stations[stations[i-1]-1] = false;
-                ready_to_go[stations[i-1]-1] = false;
-            } else if (out_sensors[i-1] &gt; 0) {
+            } else if (preprocessing[next] &gt; 0 &amp;&amp; !status_preprocessing[preprocessing[next]-1]) {
                 belt[i] = belt[i-1];
                 belt[i-1] = false;
-                activated_out_sensors[out_sensors[i-1]-1] = false;     
-            } else if (in_sensors[i-1] &gt; 0) {
+            } else if (!belt[next] &amp;&amp; (stations[next] == 0) &amp;&amp; (in_sensors[next] == 0) &amp;&amp; (preprocessing[next] == 0)){
                 belt[i] = belt[i-1];
                 belt[i-1] = false;
-                activated_in_sensors[in_sensors[i-1]-1] = false;     
-            } else if (!belt[next] &amp;&amp; (stations[next] == 0) &amp;&amp; (in_sensors[next] == 0) &amp;&amp; (out_sensors[next] == 0)){
-                belt[i] = belt[i-1];
-                belt[i-1] = false;
-            }
+            } 
         }
     }    
     belt[0] = temp;
-}</declaration>
-		<location id="id2" x="-501" y="-229">
+}
+</declaration>
+		<location id="id7" x="-1428" y="-1020">
 		</location>
-		<location id="id3" x="-637" y="-229">
+		<location id="id8" x="-1232" y="-1020">
 		</location>
-		<location id="id4" x="-365" y="-229">
-		</location>
-		<location id="id5" x="-246" y="-229">
-		</location>
-		<location id="id6" x="-119" y="-229">
-		</location>
-		<location id="id7" x="8" y="-229">
-		</location>
-		<init ref="id3"/>
-		<transition>
-			<source ref="id6"/>
-			<target ref="id7"/>
-		</transition>
-		<transition>
-			<source ref="id5"/>
-			<target ref="id6"/>
-		</transition>
-		<transition>
-			<source ref="id4"/>
-			<target ref="id5"/>
-		</transition>
-		<transition>
-			<source ref="id2"/>
-			<target ref="id4"/>
-			<label kind="synchronisation" x="-459" y="-263">move?</label>
-			<label kind="assignment" x="-459" y="-246">shift()</label>
-		</transition>
-		<transition>
-			<source ref="id3"/>
-			<target ref="id2"/>
-			<label kind="synchronisation" x="-578" y="-255">init?</label>
-		</transition>
-	</template>
-	<template>
-		<name>Processing_Station</name>
-		<parameter>const id_s id, const id_s prec_id</parameter>
-		<declaration>//nelle dichiarazioni globali ci passiamo al processo della stazione l'id della stazione corrente e l'id della 
-//precedente tramite i parameters
-clock x;
-
-void ready_to_go(id_s id){
-    ready_to_go[id-1] = true;
-}</declaration>
-		<location id="id8" x="-67" y="-102">
-			<name x="-85" y="-85">free</name>
-		</location>
-		<location id="id9" x="68" y="-102">
-		</location>
-		<location id="id10" x="-314" y="-102">
-			<name x="-356" y="-85">preprocessing</name>
-		</location>
-		<location id="id11" x="-578" y="-102">
-			<name x="-612" y="-85">processing</name>
-		</location>
-		<location id="id12" x="-314" y="-229">
-			<name x="-331" y="-263">wait</name>
-		</location>
-		<init ref="id9"/>
-		<transition>
-			<source ref="id12"/>
-			<target ref="id8"/>
-		</transition>
-		<transition>
-			<source ref="id11"/>
-			<target ref="id12"/>
-		</transition>
-		<transition>
-			<source ref="id10"/>
-			<target ref="id11"/>
-		</transition>
+		<init ref="id7"/>
 		<transition>
 			<source ref="id8"/>
-			<target ref="id10"/>
-		</transition>
-		<transition>
-			<source ref="id9"/>
 			<target ref="id8"/>
-			<label kind="synchronisation" x="-8" y="-127">init?</label>
-		</transition>
-	</template>
-	<template>
-		<name x="9" y="9">Conveyor_Belt</name>
-		<declaration>// Place local declarations here.
-clock x;
-
-// implementare la shift sull'array globale
-</declaration>
-		<location id="id13" x="-1343" y="-170">
-			<name x="-1326" y="-212">conf1</name>
-		</location>
-		<location id="id14" x="-1122" y="-119">
-			<name x="-1132" y="-153">conf2</name>
-		</location>
-		<location id="id15" x="-1368" y="-340">
-		</location>
-		<init ref="id15"/>
-		<transition>
-			<source ref="id15"/>
-			<target ref="id13"/>
-			<label kind="synchronisation" x="-1351" y="-297">init?</label>
+			<label kind="guard" x="-1147" y="-1062">x &gt;= 1</label>
+			<label kind="synchronisation" x="-1147" y="-1045">in_sensor!</label>
+			<label kind="assignment" x="-1147" y="-1028">shift(), x = 0</label>
+			<nail x="-1156" y="-1096"/>
+			<nail x="-1156" y="-952"/>
 		</transition>
 		<transition>
-			<source ref="id14"/>
-			<target ref="id13"/>
-			<label kind="guard" x="-1232" y="-110">x&gt;3</label>
-			<label kind="assignment" x="-1241" y="-93">x=0</label>
-			<nail x="-1241" y="-59"/>
-		</transition>
-		<transition>
-			<source ref="id14"/>
-			<target ref="id14"/>
-			<label kind="guard" x="-994" y="-119">x&gt;=0 &amp;&amp; x&lt;=3</label>
-			<label kind="synchronisation" x="-994" y="-102">move!</label>
-			<label kind="assignment" x="-994" y="-85">x=0</label>
-			<nail x="-1011" y="-127"/>
-			<nail x="-1011" y="-34"/>
-		</transition>
-		<transition>
-			<source ref="id13"/>
-			<target ref="id14"/>
-			<label kind="guard" x="-1241" y="-178">x&gt;3</label>
-			<label kind="assignment" x="-1241" y="-195">x=0</label>
-			<nail x="-1266" y="-153"/>
-		</transition>
-		<transition>
-			<source ref="id13"/>
-			<target ref="id13"/>
-			<label kind="guard" x="-1615" y="-238">x&gt;=0 &amp;&amp; x&lt;=3</label>
-			<label kind="synchronisation" x="-1589" y="-221">move!</label>
-			<label kind="assignment" x="-1606" y="-204">x=0, shift()</label>
-			<nail x="-1530" y="-161"/>
-			<nail x="-1530" y="-212"/>
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-1368" y="-1037">initializer?</label>
 		</transition>
 	</template>
 	<template>
 		<name>Sensor</name>
-		<declaration>//free_sensor e approaching in triggherati da sensor</declaration>
-		<location id="id16" x="0" y="0">
+		<parameter>const id_s id</parameter>
+		<declaration>bool is_first = true;
+
+void update_sensor_status(){
+    status_in_sensors[id] = 0;
+}</declaration>
+		<location id="id9" x="-391" y="-204">
 		</location>
-		<location id="id17" x="-127" y="8">
-			<name x="-137" y="-26">free</name>
+		<location id="id10" x="-263" y="-93">
 		</location>
-		<location id="id18" x="-134" y="119">
-			<name x="-153" y="127">busy</name>
+		<location id="id11" x="161" y="-93">
 		</location>
-		<init ref="id16"/>
+		<location id="id12" x="161" y="161">
+		</location>
+		<location id="id13" x="-263" y="161">
+		</location>
+		<location id="id14" x="-68" y="51">
+		</location>
+		<init ref="id9"/>
 		<transition>
-			<source ref="id16"/>
-			<target ref="id17"/>
-			<label kind="synchronisation" x="-68" y="-93">init?</label>
-			<nail x="-136" y="-110"/>
-			<nail x="-195" y="-51"/>
+			<source ref="id14"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-245" y="-38">enter_preprocessing[id]!</label>
+			<label kind="assignment" x="-245" y="-21">is_first = false, update_sensor_status()</label>
 		</transition>
 		<transition>
-			<source ref="id18"/>
-			<target ref="id17"/>
-			<nail x="-204" y="51"/>
+			<source ref="id12"/>
+			<target ref="id14"/>
+			<label kind="guard" x="17" y="76">is_first</label>
 		</transition>
 		<transition>
-			<source ref="id17"/>
-			<target ref="id18"/>
-			<label kind="synchronisation" x="-127" y="51">insensor!</label>
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-127" y="-212">status_in_sensors[id] == 0</label>
+			<nail x="-51" y="-187"/>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-442" y="25">enter_preprocessing[id]!</label>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-102" y="119">!is_first</label>
+			<label kind="synchronisation" x="-102" y="136">free_in_sensor[id]?</label>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id12"/>
+			<label kind="guard" x="170" y="25">status_in_sensors[id] == 1</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="synchronisation" x="-85" y="-119">in_sensor?</label>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-331" y="-178">initializer?</label>
 		</transition>
 	</template>
-	<system>/*station1 = Processing_Station(1);
-station2 = Processing_Station(2);
-station3 = Processing_Station(3);
-in_sensor1 = Sensor(1);
-out_sensor1 = Sensor(2);
-in_sensor2 = Sensor(3);
-out_sensor2 = Sensor(4);
-in_sensor3 = Sensor(5);
-out_sensor3 = Sensor(6);*/
-controller = Controller();
-belt = Conveyor_Belt();
+	<system>initialization = Initialization();
+processing_station1 = Processing_Station(0, 1);
+processing_station2 = Processing_Station(1, 2);
+processing_station3 = Processing_Station(2, 3);
+processing_station4 = Processing_Station(3, 0);
+sensor1 = Sensor(0);
+sensor2 = Sensor(1);
+sensor3 = Sensor(2);
+sensor4 = Sensor(3);
+conveyor_belt = Conveyor_Belt();
 
-system belt, controller;</system>
+system initialization, processing_station1, processing_station2, processing_station3, processing_station4, conveyor_belt, sensor1, sensor2, sensor3, sensor4;</system>
 	<queries>
 		<query>
 			<formula></formula>
