@@ -204,20 +204,40 @@ void shift() {
     }    
     belt[0] = temp;
 }
+
+void check_insensor(){
+    int i;
+    for(i=0; i&lt; NUM_IN_SENSORS){
+        if(status_in_sensors[i] == 1) return 1;
+    }
+    return 0;
+}
 </declaration>
 		<location id="id7" x="-1428" y="-1020">
 		</location>
 		<location id="id8" x="-1232" y="-1020">
 		</location>
+		<location id="id9" x="-943" y="-1020">
+		</location>
 		<init ref="id7"/>
 		<transition>
-			<source ref="id8"/>
+			<source ref="id9"/>
 			<target ref="id8"/>
-			<label kind="guard" x="-1147" y="-1062">x &gt;= 1</label>
-			<label kind="synchronisation" x="-1147" y="-1045">in_sensor!</label>
-			<label kind="assignment" x="-1147" y="-1028">shift(), x = 0</label>
-			<nail x="-1156" y="-1096"/>
-			<nail x="-1156" y="-952"/>
+			<label kind="guard" x="-1113" y="-892">check_insensor()==1</label>
+			<label kind="synchronisation" x="-1113" y="-875">in_sensor!</label>
+			<nail x="-1190" y="-858"/>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-1156" y="-1045">check_insensor()==0</label>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-1224" y="-1164">x &gt;= 1</label>
+			<label kind="assignment" x="-1224" y="-1181">shift(), x=0</label>
+			<nail x="-1122" y="-1181"/>
 		</transition>
 		<transition>
 			<source ref="id7"/>
@@ -233,60 +253,60 @@ void shift() {
 void update_sensor_status(){
     status_in_sensors[id] = 0;
 }</declaration>
-		<location id="id9" x="-391" y="-204">
+		<location id="id10" x="-391" y="-204">
 		</location>
-		<location id="id10" x="-263" y="-93">
+		<location id="id11" x="-263" y="-93">
 		</location>
-		<location id="id11" x="161" y="-93">
+		<location id="id12" x="161" y="-93">
 		</location>
-		<location id="id12" x="161" y="161">
+		<location id="id13" x="161" y="161">
 		</location>
-		<location id="id13" x="-263" y="161">
+		<location id="id14" x="-263" y="161">
 		</location>
-		<location id="id14" x="-68" y="51">
+		<location id="id15" x="-68" y="51">
 		</location>
-		<init ref="id9"/>
+		<init ref="id10"/>
 		<transition>
-			<source ref="id14"/>
-			<target ref="id10"/>
+			<source ref="id15"/>
+			<target ref="id11"/>
 			<label kind="synchronisation" x="-245" y="-38">enter_preprocessing[id]!</label>
 			<label kind="assignment" x="-245" y="-21">is_first = false, update_sensor_status()</label>
 		</transition>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id14"/>
+			<source ref="id13"/>
+			<target ref="id15"/>
 			<label kind="guard" x="17" y="76">is_first</label>
 		</transition>
 		<transition>
-			<source ref="id11"/>
-			<target ref="id10"/>
+			<source ref="id12"/>
+			<target ref="id11"/>
 			<label kind="guard" x="-127" y="-212">status_in_sensors[id] == 0</label>
 			<nail x="-51" y="-187"/>
 		</transition>
 		<transition>
-			<source ref="id13"/>
-			<target ref="id10"/>
+			<source ref="id14"/>
+			<target ref="id11"/>
 			<label kind="synchronisation" x="-442" y="25">enter_preprocessing[id]!</label>
 		</transition>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id13"/>
+			<source ref="id13"/>
+			<target ref="id14"/>
 			<label kind="guard" x="-102" y="119">!is_first</label>
 			<label kind="synchronisation" x="-102" y="136">free_in_sensor[id]?</label>
 		</transition>
 		<transition>
+			<source ref="id12"/>
+			<target ref="id13"/>
+			<label kind="guard" x="170" y="25">status_in_sensors[id] == 1</label>
+		</transition>
+		<transition>
 			<source ref="id11"/>
 			<target ref="id12"/>
-			<label kind="guard" x="170" y="25">status_in_sensors[id] == 1</label>
+			<label kind="synchronisation" x="-85" y="-119">in_sensor?</label>
 		</transition>
 		<transition>
 			<source ref="id10"/>
 			<target ref="id11"/>
-			<label kind="synchronisation" x="-85" y="-119">in_sensor?</label>
-		</transition>
-		<transition>
-			<source ref="id9"/>
-			<target ref="id10"/>
 			<label kind="synchronisation" x="-331" y="-178">initializer?</label>
 		</transition>
 	</template>
