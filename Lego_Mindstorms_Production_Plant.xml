@@ -50,7 +50,7 @@ int len_queue[NUM_STATIONS];
     stations[78] = 4;
     max_len_queue[3] = 2;
 
-    for(i = 23; i &lt; 23 + NUM_PIECES; i++){
+    for(i = 46; i &lt; 46 + NUM_PIECES; i++){
         belt[i] = 1;
     }
 
@@ -173,42 +173,72 @@ void update_status() {
 		<declaration>clock x;
 
 void shift() {
-    int next, prec, i;
+    int next, prec, i, tmp;
 
-    bool temp = belt[NUM_SLOTS-1];
+    bool last = belt[NUM_SLOTS-1];
     for (i = NUM_SLOTS-1; i &gt; 0; i--){
-        if (i == NUM_SLOTS-1) {
-            next = 0;
-            prec = NUM_SLOTS-1;
-        } else {
-            next = i;
-            prec = i-1;
-        }
-        if (belt[prec] &amp;&amp; !belt[next]){
+        next = i;
+        prec = i-1;
+     
             if (stations[next] &gt; 0){
                 if (!status_stations[stations[next]-1]) {
+                    tmp = belt[next];
                     belt[next] = belt[prec];
-                    belt[prec] = false;
+                    belt[prec] = tmp;
                 }
             } else if (in_sensors[next] &gt; 0){
                 if (!status_in_sensors[in_sensors[next]-1] &amp;&amp; !status_preprocessing[in_sensors[next]-1]) { //ho aggiunto se è anche nello stato di preprocessing controlare domani le condizioni
+                    tmp = belt[next];
                     belt[next] = belt[prec];
-                    belt[prec] = false;
+                    belt[prec] = tmp;
                     status_in_sensors[in_sensors[next]-1] = 1;                    
                 }    
             } else if (stations[prec] &amp;&amp; !status_stations[stations[prec]-1]) {
-                belt[next] = belt[prec];
-                belt[prec] = false;
+               tmp = belt[next];
+               belt[next] = belt[prec];
+               belt[prec] = tmp;
             } else if (preprocessing[next] &gt; 0 &amp;&amp; !status_preprocessing[preprocessing[next]-1]) {
-                belt[next] = belt[prec];
-                belt[prec] = false;
+                    tmp = belt[next];
+                    belt[next] = belt[prec];
+                    belt[prec] = tmp;
             } else if (!belt[next] &amp;&amp; (stations[next] == 0) &amp;&amp; (in_sensors[next] == 0) &amp;&amp; (preprocessing[next] == 0)){
-                belt[next] = belt[prec];
-                belt[prec] = false;
-            } 
-        }
+                    tmp = belt[next];
+                    belt[next] = belt[prec];
+                    belt[prec] = tmp;
+            }
     }    
-    belt[0] = temp;
+    belt[0] = last;
+
+    next = 0;
+    prec = NUM_SLOTS-1;
+
+            if (stations[next] &gt; 0){
+                if (!status_stations[stations[next]-1]) {
+                    tmp = belt[next];
+                    belt[next] = belt[prec];
+                    belt[prec] = tmp;
+                }
+            } else if (in_sensors[next] &gt; 0){
+                if (!status_in_sensors[in_sensors[next]-1] &amp;&amp; !status_preprocessing[in_sensors[next]-1]) { //ho aggiunto se è anche nello stato di preprocessing controlare domani le condizioni
+                    tmp = belt[next];
+                    belt[next] = belt[prec];
+                    belt[prec] = tmp;
+                    status_in_sensors[in_sensors[next]-1] = 1;                    
+                }    
+            } else if (stations[prec] &amp;&amp; !status_stations[stations[prec]-1]) {
+               tmp = belt[next];
+               belt[next] = belt[prec];
+               belt[prec] = tmp;
+            } else if (preprocessing[next] &gt; 0 &amp;&amp; !status_preprocessing[preprocessing[next]-1]) {
+                    tmp = belt[next];
+                    belt[next] = belt[prec];
+                    belt[prec] = tmp;
+            } else if (!belt[next] &amp;&amp; (stations[next] == 0) &amp;&amp; (in_sensors[next] == 0) &amp;&amp; (preprocessing[next] == 0)){
+                    tmp = belt[next];
+                    belt[next] = belt[prec];
+                    belt[prec] = tmp;
+            }
+    
 }
 
 int check_insensor(){
