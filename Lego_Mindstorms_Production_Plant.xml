@@ -98,12 +98,12 @@ int get_processing_time() {
 }
 
 void enqueue() {
-    len_queue[id+1]++;
+    len_queue[next_id]++;
 }
 
 void dequeue() {
     status_preprocessing[id] = 1;
-    len_queue[id]--;
+    if (len_queue[id]&gt;0) len_queue[id]--;
 }
 
 void update_station_status(){
@@ -159,9 +159,8 @@ void update_status() {
 		<transition>
 			<source ref="id3"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-433" y="-221">len_queue[id] &gt; 0</label>
-			<label kind="synchronisation" x="-433" y="-204">enter_preprocessing[id]?</label>
-			<label kind="assignment" x="-433" y="-187">y = 0, dequeue()</label>
+			<label kind="synchronisation" x="-442" y="-221">enter_preprocessing[id]?</label>
+			<label kind="assignment" x="-433" y="-204">y = 0, dequeue()</label>
 		</transition>
 		<transition>
 			<source ref="id2"/>
