@@ -85,7 +85,7 @@ int len_queue[NUM_STATIONS];
 	</template>
 	<template>
 		<name>Processing_Station</name>
-		<parameter>const id_s id, const id_s next_id</parameter>
+		<parameter>const id_s id, const id_s next_id, const int in_sens_pos</parameter>
 		<declaration>clock y;
 
 int get_len_pre_processing() {
@@ -100,21 +100,21 @@ int get_len_pre_processing() {
 }
 
 int get_processing_time() { //fai un array di processing times
-    return 5;
+    return 500;
 }
 
 void enqueue() {
     len_queue[next_id]++;
 }
 
-void dequeue() {
+void dequeue(int in_sens_pos) {
     status_preprocessing[id] = 1;
-    status_in_sensors[id] = 0;
+    if (!belt[in_sens_pos]) status_in_sensors[id] = 0;
     if (len_queue[id]&gt;0) len_queue[id]--;
 }
 
 void update_station_status(){
-    status_stations[id] = 1;
+    //status_stations[id] = 1;
     status_preprocessing[id] = 0;
 }
 
@@ -130,12 +130,11 @@ void update_status() {
 		<location id="id3" x="-484" y="-229">
 		</location>
 		<location id="id4" x="-229" y="-229">
-			<label kind="invariant" x="-297" y="-272">y &lt; get_len_pre_processing()</label>
 		</location>
 		<location id="id5" x="-102" y="-76">
 		</location>
 		<location id="id6" x="59" y="-229">
-			<label kind="invariant" x="85" y="-238">y &lt; get_processing_time()</label>
+			<label kind="invariant" x="85" y="-238">y &lt;= get_processing_time()</label>
 		</location>
 		<init ref="id2"/>
 		<transition>
@@ -149,12 +148,12 @@ void update_status() {
 		<transition>
 			<source ref="id6"/>
 			<target ref="id5"/>
-			<label kind="guard" x="-42" y="-136">len_queue[next_id] == max_len_queue[next_id]</label>
+			<label kind="guard" x="-42" y="-136">len_queue[next_id] == max_len_queue[next_id] &amp;&amp; y == get_processing_time()</label>
 		</transition>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-306" y="-442">len_queue[next_id] &lt; max_len_queue[next_id]</label>
+			<label kind="guard" x="-306" y="-442">len_queue[next_id] &lt; max_len_queue[next_id] &amp;&amp; y == get_processing_time()</label>
 			<label kind="synchronisation" x="-306" y="-425">free_in_sensor[id]!</label>
 			<label kind="assignment" x="-306" y="-408">enqueue(), update_status()</label>
 			<nail x="-238" y="-382"/>
@@ -162,13 +161,14 @@ void update_status() {
 		<transition>
 			<source ref="id4"/>
 			<target ref="id6"/>
+			<label kind="guard" x="-195" y="-255">status_stations[id] == 1</label>
 			<label kind="assignment" x="-204" y="-221">y = 0, update_station_status()</label>
 		</transition>
 		<transition>
 			<source ref="id3"/>
 			<target ref="id4"/>
 			<label kind="synchronisation" x="-442" y="-221">enter_preprocessing[id]?</label>
-			<label kind="assignment" x="-433" y="-204">y = 0, dequeue()</label>
+			<label kind="assignment" x="-433" y="-204">y = 0, dequeue(in_sens_pos)</label>
 		</transition>
 		<transition>
 			<source ref="id2"/>
@@ -182,7 +182,7 @@ void update_status() {
 
 void shift() {
     int next, prec, i, tmp;
-    
+
     bool last = belt[NUM_SLOTS-1];
     for (i = NUM_SLOTS-1; i &gt;= 0; i--){
         if (i == 0) {
@@ -199,28 +199,24 @@ void shift() {
                 tmp = belt[next];
                 belt[next] = belt[prec];
                 belt[prec] = tmp;
-
+                status_stations[stations[next]-1] = 1;
             } else if (in_sensors[next] &gt; 0){
                 tmp = belt[next];
                 belt[next] = belt[prec];
                 belt[prec] = tmp;
                 status_in_sensors[in_sensors[next]-1] = 1;   
-
             } else if(in_sensors[prec] &gt; 0 &amp;&amp; !status_preprocessing[in_sensors[prec]-1] &amp;&amp; !status_stations[in_sensors[prec]-1]){
                 tmp = belt[next];
                 belt[next] = belt[prec];
-                belt[prec] = tmp;               
-                    
+                belt[prec] = tmp;             
             } else if (stations[prec] &amp;&amp; !status_stations[stations[prec]-1]) { 
                tmp = belt[next];
                belt[next] = belt[prec];
                belt[prec] = tmp;
-
-            } else if (preprocessing[next] &gt; 0) {
+            } else if (preprocessing[next] &gt; 0 &amp;&amp; preprocessing[prec] &gt; 0) {
                     tmp = belt[next];
                     belt[next] = belt[prec];
                     belt[prec] = tmp;
-
             } else if (!belt[next] &amp;&amp; (stations[next] == 0) &amp;&amp; (in_sensors[next] == 0) &amp;&amp; (preprocessing[next] == 0)){
                     tmp = belt[next];
                     belt[next] = belt[prec];
@@ -301,7 +297,7 @@ void update_sensor_status(){
 			<source ref="id11"/>
 			<target ref="id12"/>
 			<label kind="synchronisation" x="8" y="-127">in_sensor?</label>
-			<nail x="408" y="-93"/>
+			<nail x="433" y="-93"/>
 		</transition>
 		<transition>
 			<source ref="id13"/>
@@ -315,7 +311,7 @@ void update_sensor_status(){
 		</transition>
 	</template>
 	<system>initialization = Initialization();
-processing_station1 = Processing_Station(0, 0);
+processing_station1 = Processing_Station(0, 0, 5);
 /*processing_station2 = Processing_Station(1, 2);
 processing_station3 = Processing_Station(2, 3);
 processing_station4 = Processing_Station(3, 0);*/
