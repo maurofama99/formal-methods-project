@@ -20,7 +20,7 @@ bool status_in_sensors[NUM_IN_SENSORS];
 bool status_stations[NUM_STATIONS];
 bool status_preprocessing[NUM_STATIONS];
 
-chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS];
+chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS], sensor_busy[NUM_IN_SENSORS];
 broadcast chan initializer, in_sensor;
 
 int max_len_queue[NUM_STATIONS];
@@ -146,7 +146,6 @@ void free_station(){
 			<label kind="invariant" x="204" y="-238">y &lt;= get_processing_time()</label>
 		</location>
 		<location id="id7" x="-136" y="-510">
-			<urgent/>
 		</location>
 		<init ref="id2"/>
 		<transition>
@@ -160,7 +159,7 @@ void free_station(){
 		<transition>
 			<source ref="id3"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-382" y="-289">x &gt; 10</label>
+			<label kind="guard" x="-382" y="-289">x &gt;= 10</label>
 			<label kind="synchronisation" x="-382" y="-255">enter_preprocessing[id]?</label>
 			<label kind="assignment" x="-382" y="-272">dequeue(in_sens_pos)</label>
 		</transition>
@@ -182,7 +181,7 @@ void free_station(){
 			<source ref="id6"/>
 			<target ref="id7"/>
 			<label kind="guard" x="-34" y="-467">len_queue[next_id] &lt; max_len_queue[next_id] &amp;&amp; y == get_processing_time()</label>
-			<label kind="assignment" x="-25" y="-450">enqueue()</label>
+			<label kind="assignment" x="-25" y="-450">enqueue(), x = 0</label>
 		</transition>
 		<transition>
 			<source ref="id5"/>
@@ -316,31 +315,38 @@ void update_sensor_status(){
 		<location id="id12" x="-263" y="-93">
 			<name x="-273" y="-127">FREE</name>
 		</location>
-		<location id="id13" x="433" y="255">
-			<name x="450" y="246">BUSY</name>
-			<label kind="invariant" x="423" y="272">x &lt;= 5</label>
+		<location id="id13" x="212" y="8">
+			<name x="229" y="-1">BUSY</name>
+			<label kind="invariant" x="202" y="25">x &lt;= 5</label>
 		</location>
 		<location id="id14" x="-263" y="255">
 			<name x="-314" y="246">WAIT</name>
 		</location>
+		<location id="id15" x="17" y="306">
+			<name x="-17" y="332">NEED_TIME</name>
+		</location>
 		<init ref="id11"/>
 		<transition>
-			<source ref="id13"/>
+			<source ref="id15"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-221" y="195">status_in_sensors[id] == 1 &amp;&amp; status_preprocessing[id] == 0 &amp;&amp; status_stations[id] == 0 &amp;&amp; x &gt;= 0</label>
-			<label kind="synchronisation" x="-25" y="221">enter_preprocessing[id]!</label>
+			<label kind="synchronisation" x="-204" y="297">enter_preprocessing[id]!</label>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id15"/>
+			<label kind="guard" x="-85" y="178">status_in_sensors[id] == 1 &amp;&amp; status_preprocessing[id] == 0 &amp;&amp; status_stations[id] == 0 &amp;&amp; x &gt;= 0</label>
 		</transition>
 		<transition>
 			<source ref="id13"/>
 			<target ref="id12"/>
-			<label kind="guard" x="17" y="17">status_in_sensors[id] == 0</label>
+			<label kind="guard" x="-68" y="25">status_in_sensors[id] == 0</label>
 		</transition>
 		<transition>
 			<source ref="id12"/>
 			<target ref="id13"/>
 			<label kind="synchronisation" x="8" y="-127">in_sensor?</label>
 			<label kind="assignment" x="8" y="-144">x = 0</label>
-			<nail x="433" y="-93"/>
+			<nail x="204" y="-93"/>
 		</transition>
 		<transition>
 			<source ref="id14"/>
