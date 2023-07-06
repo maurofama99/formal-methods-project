@@ -135,8 +135,8 @@ void free_station(){
 		<location id="id3" x="-484" y="-229">
 			<name x="-510" y="-280">FREE</name>
 		</location>
-		<location id="id4" x="-136" y="-229">
-			<name x="-187" y="-195">PREPROCESSING</name>
+		<location id="id4" x="-144" y="-229">
+			<name x="-195" y="-204">PREPROCESSING</name>
 		</location>
 		<location id="id5" x="-42" y="-76">
 			<name x="-25" y="-76">WAIT</name>
@@ -145,7 +145,7 @@ void free_station(){
 			<name x="168" y="-263">PROCESSING</name>
 			<label kind="invariant" x="204" y="-238">y &lt;= get_processing_time()</label>
 		</location>
-		<location id="id7" x="-136" y="-510">
+		<location id="id7" x="-144" y="-510">
 		</location>
 		<location id="id8" x="-144" y="-348">
 		</location>
@@ -257,7 +257,7 @@ void shift() {
                     tmp = belt[next];
                     belt[next] = belt[prec];
                     belt[prec] = tmp;
-            } else if (!belt[next] &amp;&amp; (stations[next] == 0) &amp;&amp; (in_sensors[next] == 0) &amp;&amp; (preprocessing[next] == 0)){
+            } else if (!belt[next] &amp;&amp; (stations[next] == 0) &amp;&amp; (in_sensors[next] == 0) &amp;&amp; (preprocessing[next] == 0) &amp;&amp; (stations[prec] == 0) &amp;&amp; (in_sensors[prec] == 0) &amp;&amp; (preprocessing[prec] == 0)){
                     tmp = belt[next];
                     belt[next] = belt[prec];
                     belt[prec] = tmp;
@@ -337,7 +337,7 @@ void update_sensor_status(){
 		<transition>
 			<source ref="id16"/>
 			<target ref="id15"/>
-			<label kind="guard" x="-212" y="221">x &gt;= 20</label>
+			<label kind="guard" x="-212" y="221">x &gt;= 15</label>
 			<label kind="synchronisation" x="-212" y="204">enter_preprocessing[id]!</label>
 		</transition>
 		<transition>
