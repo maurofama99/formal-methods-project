@@ -221,12 +221,15 @@ void free_station(){
 		<declaration>clock x;
 
 void shift() {
-    int next, prec, i, tmp;
+    int next, prec, i, tmp, tmplast;
 
     bool last = belt[NUM_SLOTS-1];
     for (i = NUM_SLOTS-1; i &gt;= 0; i--){
         if (i == 0) {
-            belt[0] = last;
+            if (!last) {
+                tmplast = belt[NUM_SLOTS-1];
+                belt[NUM_SLOTS-1] = last;
+            } 
             next = 0;
             prec = NUM_SLOTS-1; 
         } else {
@@ -264,6 +267,7 @@ void shift() {
             }
         }
     }    
+    if (!last) belt[NUM_SLOTS-1] = tmplast;
 }
 
 int check_insensor(){
