@@ -2,11 +2,11 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
-const int NUM_PIECES = 2; 
-const int NUM_STATIONS = 1;
-const int NUM_IN_SENSORS = 1;
-const int NUM_OUT_SENSORS = 1;
-const int NUM_SLOTS = 10;
+const int NUM_PIECES = 3; 
+const int NUM_STATIONS = 3;
+const int NUM_IN_SENSORS = 3;
+const int NUM_OUT_SENSORS = 2;
+const int NUM_SLOTS = 30;
 
 typedef int[0, NUM_STATIONS-1] id_s;
 
@@ -54,8 +54,22 @@ int len_queue[NUM_STATIONS];
     in_sensors[5] = 1;
     stations[7] = 1;
     preprocessing[6] = 1;
-    max_len_queue[0] = 2;
+    max_len_queue[0] = 3;
 
+
+    out_sensors[10] = 2;
+    in_sensors[16] = 2;
+    stations[20] = 2;
+    preprocessing[17] = 2;
+    preprocessing[18] = 2;
+    preprocessing[19] = 2;
+    max_len_queue[1] = 7;
+
+    in_sensors[23] = 3;
+    stations[25] = 3; //da provare con stazione 24
+    preprocessing[24] = 3;   
+    max_len_queue[2] = 3;
+    
     for(i = 0; i &lt; NUM_PIECES; i++){
         belt[i] = 1;
     }
@@ -101,7 +115,7 @@ int get_len_pre_processing() {
 }
 
 int get_processing_time() { //fai un array di processing times
-    return 500;
+    return in_sens_pos*20;
 }
 
 void enqueue() {
@@ -158,14 +172,6 @@ void free_station(){
 		</transition>
 		<transition>
 			<source ref="id3"/>
-			<target ref="id3"/>
-			<label kind="synchronisation" x="-663" y="-195">in_sensor?</label>
-			<label kind="assignment" x="-663" y="-178">x = 0</label>
-			<nail x="-535" y="-119"/>
-			<nail x="-586" y="-221"/>
-		</transition>
-		<transition>
-			<source ref="id3"/>
 			<target ref="id4"/>
 			<label kind="synchronisation" x="-382" y="-255">enter_preprocessing[id]?</label>
 			<label kind="assignment" x="-382" y="-272">dequeue(), x=0</label>
@@ -175,7 +181,8 @@ void free_station(){
 			<target ref="id8"/>
 			<label kind="guard" x="-136" y="-408">belt[in_sens_pos]</label>
 			<label kind="synchronisation" x="-136" y="-425">in_sensor?</label>
-			<label kind="assignment" x="-136" y="-391">x=0</label>
+			<label kind="assignment" x="-136" y="-391">enqueue(), free_station(), 
+x=0</label>
 			<nail x="-144" y="-365"/>
 		</transition>
 		<transition>
@@ -183,13 +190,13 @@ void free_station(){
 			<target ref="id3"/>
 			<label kind="guard" x="-501" y="-416">!belt[in_sens_pos]</label>
 			<label kind="synchronisation" x="-501" y="-433">free_in_sensor[id]!</label>
-			<label kind="assignment" x="-501" y="-399">free_all(), x = 0</label>
+			<label kind="assignment" x="-501" y="-399">free_all(), enqueue(), x = 0</label>
 		</transition>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id7"/>
-			<label kind="guard" x="-34" y="-467">len_queue[next_id] &lt; max_len_queue[next_id] &amp;&amp; y == get_processing_time()</label>
-			<label kind="assignment" x="-25" y="-450">enqueue(), free_station()</label>
+			<label kind="guard" x="0" y="-484">len_queue[next_id] &lt; max_len_queue[next_id] &amp;&amp; y == get_processing_time()</label>
+			<nail x="93" y="-433"/>
 		</transition>
 		<transition>
 			<source ref="id5"/>
@@ -377,20 +384,20 @@ x &gt;= 0</label>
 		</transition>
 	</template>
 	<system>initialization = Initialization();
-processing_station1 = Processing_Station(0, 0, 5);
-/*processing_station2 = Processing_Station(1, 2);
-processing_station3 = Processing_Station(2, 3);
-processing_station4 = Processing_Station(3, 0);*/
+processing_station1 = Processing_Station(0, 1, 5);
+processing_station2 = Processing_Station(1, 2, 16);
+processing_station3 = Processing_Station(2, 0, 23);
+//processing_station4 = Processing_Station(3, 0);
 sensor1 = Sensor(0);
-/*sensor2 = Sensor(1);
+sensor2 = Sensor(1);
 sensor3 = Sensor(2);
-sensor4 = Sensor(3);*/
+//sensor4 = Sensor(3);
 conveyor_belt = Conveyor_Belt();
 
-system initialization, processing_station1, conveyor_belt, sensor1;</system>
+system initialization, processing_station1, processing_station2, processing_station3, conveyor_belt, sensor1, sensor2, sensor3;</system>
 	<queries>
 		<query>
-			<formula></formula>
+			<formula>A[] not deadlock</formula>
 			<comment></comment>
 		</query>
 	</queries>
