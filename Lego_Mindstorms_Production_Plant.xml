@@ -24,6 +24,9 @@ bool status_in_sensors[NUM_IN_SENSORS];
 bool status_stations[NUM_STATIONS];
 bool status_preprocessing[NUM_STATIONS];
 
+const double processing_mean = 30.0; 
+const double processing_variance = 5.0;
+
 chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS], sensor_busy[NUM_IN_SENSORS];
 broadcast chan in_sensor, step, initialize;
 
@@ -70,8 +73,7 @@ int i;
 	<template>
 		<name>Processing_Station</name>
 		<parameter>const id_s id</parameter>
-		<declaration>clock y;
-clock x;
+		<declaration>clock x;
 int processing_counter = 0;
 int in_sens_pos;
 int out_sens_pos;
@@ -79,6 +81,7 @@ int prev_stat_pos;
 int next_id;
 int prev_id;
 int len_queue_verifier;
+int processing_time;
 
 int get_len_pre_processing() {
     int i, station, sensor;
@@ -89,10 +92,6 @@ int get_len_pre_processing() {
     }
     if (sensor &gt; station) return NUM_SLOTS - sensor + station;
     else return station-sensor;
-}
-
-int get_processing_time(){ //fai un array di processing times
-    return in_sens_pos*5;
 }
 
 void enqueue(){
@@ -108,6 +107,7 @@ void dequeue(){
 void free_preprocessing(){
     //status_stations[id] = 1;
     status_preprocessing[id] = 0;
+    processing_time = fint(random_normal(processing_mean, sqrt(processing_variance)));
 }
 
 void free_all(){
@@ -160,7 +160,7 @@ void set_len_queue() {
 		</location>
 		<location id="id3" x="348" y="-229">
 			<name x="314" y="-212">PROCESSING</name>
-			<label kind="invariant" x="272" y="-195">x &lt;= get_processing_time()</label>
+			<label kind="invariant" x="272" y="-195">x &lt;= processing_time</label>
 		</location>
 		<location id="id4" x="-143" y="-510">
 			<name x="-195" y="-544">AFTER_PROCESSING</name>
@@ -217,7 +217,7 @@ void set_len_queue() {
 			<source ref="id3"/>
 			<target ref="id4"/>
 			<label kind="guard" x="365" y="-552">len_queue[next_id] &lt; max_len_queue[next_id] &amp;&amp; 
-x == get_processing_time()</label>
+x == processing_time</label>
 			<label kind="assignment" x="365" y="-501">enqueue(), free_station(), x = 0</label>
 			<nail x="348" y="-510"/>
 		</transition>
@@ -233,7 +233,7 @@ x == get_processing_time()</label>
 			<source ref="id3"/>
 			<target ref="id2"/>
 			<label kind="guard" x="484" y="-204">len_queue[next_id] == max_len_queue[next_id] &amp;&amp; 
-x &gt;= get_processing_time()</label>
+x &gt;= processing_time</label>
 		</transition>
 		<transition>
 			<source ref="id1"/>
@@ -322,14 +322,6 @@ void shift() {
         }
     }   
     if(!first) belt[0] = tmpfirst; 
-}
-
-int check_insensor(){
-    int i;
-    for(i=0; i&lt; NUM_IN_SENSORS; i++){
-        if(status_in_sensors[i] == 1) return 1;
-    }
-    return 0;
 }
 </declaration>
 		<location id="id8" x="-1232" y="-1020">
