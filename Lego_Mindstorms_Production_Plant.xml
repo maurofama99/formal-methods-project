@@ -98,15 +98,15 @@ int get_len_pre_processing() {
     else return station-sensor;
 }
 
-int get_processing_time() { //fai un array di processing times
+int get_processing_time(){ //fai un array di processing times
     return in_sens_pos*5;
 }
 
-void enqueue() {
+void enqueue(){
     len_queue[next_id]++;
 }
 
-void dequeue() {
+void dequeue(){
     status_preprocessing[id] = 1;
     if (!belt[in_sens_pos]) status_in_sensors[id] = 0;
     if (len_queue[id]&gt;0) len_queue[id]--;
@@ -117,7 +117,7 @@ void free_preprocessing(){
     status_preprocessing[id] = 0;
 }
 
-void free_all() {
+void free_all(){
     status_stations[id] = 0;
     status_preprocessing[id] = 0;
     if (!belt[in_sens_pos]) status_in_sensors[id] = 0;
@@ -162,8 +162,8 @@ void set_len_queue() {
 		<location id="id1" x="-144" y="-229">
 			<name x="-195" y="-204">PREPROCESSING</name>
 		</location>
-		<location id="id2" x="875" y="-229">
-			<name x="892" y="-229">WAIT</name>
+		<location id="id2" x="756" y="-229">
+			<name x="773" y="-229">WAIT</name>
 		</location>
 		<location id="id3" x="348" y="-229">
 			<name x="314" y="-212">PROCESSING</name>
@@ -178,15 +178,15 @@ void set_len_queue() {
 		<location id="id6" x="-484" y="-510">
 			<urgent/>
 		</location>
-		<location id="id7" x="-561" y="-93">
-			<name x="-571" y="-127">INIT</name>
+		<location id="id7" x="-629" y="-229">
+			<name x="-639" y="-263">INIT</name>
 		</location>
 		<init ref="id7"/>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id0"/>
-			<label kind="synchronisation" x="-518" y="-144">initialize?</label>
-			<label kind="assignment" x="-518" y="-161">set_parameters()</label>
+			<label kind="synchronisation" x="-586" y="-221">initialize?</label>
+			<label kind="assignment" x="-612" y="-195">set_parameters()</label>
 		</transition>
 		<transition>
 			<source ref="id6"/>
@@ -210,7 +210,7 @@ void set_len_queue() {
 			<target ref="id5"/>
 			<label kind="guard" x="-136" y="-450">belt[in_sens_pos] || belt[in_sens_pos+1]</label>
 			<label kind="synchronisation" x="-136" y="-467">step?</label>
-			<label kind="assignment" x="-136" y="-433">processing_counter--, set_len_queue()</label>
+			<label kind="assignment" x="-136" y="-433">processing_counter--</label>
 		</transition>
 		<transition>
 			<source ref="id4"/>
@@ -218,12 +218,12 @@ void set_len_queue() {
 			<label kind="guard" x="-408" y="-501">!belt[in_sens_pos] &amp;&amp; 
 !belt[in_sens_pos+1]</label>
 			<label kind="synchronisation" x="-357" y="-535">step?</label>
-			<label kind="assignment" x="-450" y="-467">processing_counter--, set_len_queue()</label>
+			<label kind="assignment" x="-450" y="-467">processing_counter--</label>
 		</transition>
 		<transition>
 			<source ref="id3"/>
 			<target ref="id4"/>
-			<label kind="guard" x="357" y="-544">len_queue[next_id] &lt; max_len_queue[next_id] &amp;&amp; 
+			<label kind="guard" x="365" y="-552">len_queue[next_id] &lt; max_len_queue[next_id] &amp;&amp; 
 x == get_processing_time()</label>
 			<label kind="assignment" x="365" y="-501">enqueue(), free_station(), x = 0</label>
 			<nail x="348" y="-510"/>
@@ -231,9 +231,10 @@ x == get_processing_time()</label>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id4"/>
-			<label kind="guard" x="841" y="-459">len_queue[next_id] &lt; max_len_queue[next_id]</label>
-			<label kind="assignment" x="841" y="-433">free_station(), enqueue(), x=0</label>
-			<nail x="756" y="-638"/>
+			<label kind="guard" x="765" y="-433">len_queue[next_id] &lt; max_len_queue[next_id]</label>
+			<label kind="assignment" x="765" y="-408">free_station(), enqueue(), x=0</label>
+			<nail x="756" y="-748"/>
+			<nail x="-144" y="-748"/>
 		</transition>
 		<transition>
 			<source ref="id3"/>
@@ -247,7 +248,7 @@ x &gt;= get_processing_time()</label>
 			<label kind="guard" x="-17" y="-289">status_stations[id] == 1</label>
 			<label kind="synchronisation" x="34" y="-306">step?</label>
 			<label kind="assignment" x="-17" y="-272">x = 0, free_preprocessing(), 
-processing_counter++, set_len_queue()</label>
+processing_counter++</label>
 		</transition>
 	</template>
 	<template>
@@ -329,11 +330,11 @@ int check_insensor(){
 		<transition>
 			<source ref="id8"/>
 			<target ref="id8"/>
-			<label kind="guard" x="-1105" y="-1139">x &gt; 5</label>
-			<label kind="synchronisation" x="-1105" y="-1181">step!</label>
-			<label kind="assignment" x="-1105" y="-1156">shift(), x=0, update_belt_count()</label>
-			<nail x="-1088" y="-1113"/>
-			<nail x="-1045" y="-1045"/>
+			<label kind="guard" x="-1122" y="-1122">x &gt; 5</label>
+			<label kind="synchronisation" x="-1122" y="-1164">step!</label>
+			<label kind="assignment" x="-1122" y="-1139">shift(), x=0, update_belt_count()</label>
+			<nail x="-1096" y="-1096"/>
+			<nail x="-1096" y="-977"/>
 		</transition>
 	</template>
 	<template>
@@ -399,8 +400,8 @@ status_stations[id] == 0</label>
 			<comment>It never happens that a station holds more than 1 piece</comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment>No queue ever exceeds the maximum allowed length</comment>
+			<formula>A[] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i]</formula>
+			<comment>no queue ever exceeds the maximum allowed length</comment>
 		</query>
 	</queries>
 </nta>
