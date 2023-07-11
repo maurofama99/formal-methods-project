@@ -60,6 +60,16 @@ The remaining arrays, namely \texttt{stations}, \texttt{in\_sensors}, \texttt{ou
 By utilizing these data structures, we establish a robust framework to effectively manage, monitor, and synchronize the state and locations of various elements within the production plant.\\
 The auxiliary arrays \texttt{status\_stations}, \texttt{status\_in\_sensors}, and \texttt{status\_preprocessing} are utilized to determine the occupation status of the corresponding components they represent. These arrays have a length equal to the total number of components they represent, and each position corresponds to the ID of the represented component. A value of 1 indicates that the component is occupied, while a value of 0 indicates that it is available. By monitoring these arrays, the system can effectively track the occupancy status of the components.
 \subsection{Channels}
+The system utilizes several channels:
+\begin{itemize}
+\item \texttt{enter\_preprocessing}: This channel is indexed by the number of stations in the system. It is used to signal the entry of a workpiece into the preprocessing stage.
+\item \texttt{free\_in\_sensor}: This channel is indexed by the number of input sensors in the system. It is used to indicate the availability of an input sensor for processing a workpiece.
+\item \texttt{sensor\_busy}: This channel is also indexed by the number of input sensors in the system. It is used to notify the system that an input sensor is currently occupied and cannot process a new workpiece.
+\item \texttt{step}: This is a broadcast channel used to synchronize the system steps. It enables the components to advance together in a synchronized manner.
+\item \texttt{initialize}: This is a broadcast channel used for system initialization. It triggers the initialization process and sets the parameters for the system components.
+\end{itemize}
+
+
 
 \subsection{Conveyor Belt}
 \subsection{Processing Station}
