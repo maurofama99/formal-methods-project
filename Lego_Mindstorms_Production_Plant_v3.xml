@@ -301,7 +301,7 @@ void set_pos(){
 		<transition>
 			<source ref="id9"/>
 			<target ref="id10"/>
-			<label kind="guard" x="-561" y="-17">belt[out_sensor_pos] == 1</label>
+			<label kind="guard" x="-561" y="-17">belt[out_sensor_pos] == 0</label>
 			<label kind="synchronisation" x="-561" y="0">free[id]!</label>
 			<nail x="-510" y="-25"/>
 		</transition>
