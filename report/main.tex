@@ -1,0 +1,78 @@
+\documentclass[11pt, oneside]{article} 
+\usepackage{mathptmx}
+\usepackage{amsmath, amsthm, amssymb, calrsfs, wasysym, verbatim, bbm, color, graphics, geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{rotating}
+\usepackage{adjustbox}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[table]{xcolor}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{amsmath}
+
+\geometry{tmargin=.75in, bmargin=.75in, lmargin=.75in, rmargin = .75in}  
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Cdot}{\boldsymbol{\cdot}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{defn}{Definition}
+\newtheorem{conv}{Convention}
+\newtheorem{rem}{Remark}
+\newtheorem{lem}{Lemma}
+\newtheorem{cor}{Corollary}
+
+\font\arial=cmr12 at 40pt
+\title{{\arial Titolo}}
+\font\calibri=cmr12 at 20pt
+\author{{\calibri Autore1, Autore2, Autore3}}
+\date{Academic Year 2022-2023}
+
+\begin{document}
+
+\maketitle
+\begin{center}
+    \includegraphics[scale=0.43]{images/title.png}
+\end{center}
+\newpage
+\vspace{.25in}
+%---------------------------------------%
+
+\section{Introduction}
+The work consists in developing a formal model of a Lego Mindstorms production plant, verifying key properties, and analyzing the behavior of the plant under different configurations, both deterministic and stochastic, using the Uppaal tool, used for modeling and verifying real-time systems, involving two phases: exhaustive model checking and statistical model checking. \\
+The production plant operates with a one-directional conveyor belt that carries workpieces through different processing stations. Each station can process only one piece at a time, and the duration of processing may vary between stations. The flow of workpieces is controlled by a flow controller that can either direct them to a specific station or divert them to an alternative branch of the belt. Laser-based sensors detect the presence of pieces and prevent station overcrowding by blocking new pieces from entering when a station is busy. \\
+In the stochastic version of the production plant, certain aspects of the system involve randomness or uncertainty. The processing time at each station follows a probabilistic distribution, specifically a normal distribution. Additionally, there is a probability of sensor malfunctions, where sensors may detect or fail to detect pieces incorrectly. 
+%---------------------------------------
+\section{Model Description}
+\subsection{Data Structures}
+In our system, we rely on five key arrays to effectively manage the production plant. These data structures serve as integral components for representing and tracking the state and positions of various elements within the system.
+The most vital data structure is the \texttt{belt} array, which serves as a representation of the conveyor belt in the production plant. It consists of a boolean array where each element corresponds to a specific slot on the belt. The binary value assigned to each element (0 or 1) signifies the presence or absence of a workpiece within the respective slot.\\
+The remaining arrays, namely \texttt{stations}, \texttt{in\_sensors}, \texttt{out\_sensors}, and \texttt{preprocessing}, follow a similar pattern and have the same length as the conveyor belt. These arrays are essential for accurately recording the positions and statuses of associated elements. For instance, if a station occupies slot 16, the element at index 16 in the \texttt{stations} array will store the unique identifier (ID) of the station. The same principle applies to the other arrays, facilitating the identification and tracking of input sensors, output sensors, and preprocessing components.\\
+By utilizing these data structures, we establish a robust framework to effectively manage, monitor, and synchronize the state and locations of various elements within the production plant.\\
+The auxiliary arrays \texttt{status\_stations}, \texttt{status\_in\_sensors}, and \texttt{status\_preprocessing} are utilized to determine the occupation status of the corresponding components they represent. These arrays have a length equal to the total number of components they represent, and each position corresponds to the ID of the represented component. A value of 1 indicates that the component is occupied, while a value of 0 indicates that it is available. By monitoring these arrays, the system can effectively track the occupancy status of the components.
+\subsection{Channels}
+
+\subsection{Conveyor Belt}
+\subsection{Processing Station}
+\subsection{Initializer}
+\subsection{Assumptions}
+
+%---------------------------------------%
+\section{Evaluation and Results}
+\subsection{Queries explanation}
+\subsection{Scenario 1}
+\subsection{Scenario 2}
+\subsection{Scenario 3}
+
+%---------------------------------------%
+
+\end{document}
