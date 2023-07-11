@@ -2,13 +2,13 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>const int NUM_PIECES = 5; 
-const int NUM_OUT_SENSORS = 5;
-const int NUM_SLOTS = 88;
-const int GATE_POS = 11;
+const int NUM_OUT_SENSORS = 1;
+const int NUM_SLOTS = 40;
+const int GATE_POS = 5;
 
 /** Change this to modify number of stations and input sensors **/
-            const int NUM_STATIONS = 6;
-            const int NUM_IN_SENSORS = 6;
+            const int NUM_STATIONS = 2;
+            const int NUM_IN_SENSORS = 2;
 /****************************************************************/
 
 typedef int[0, NUM_STATIONS-1] id_s;
@@ -49,35 +49,16 @@ void initializer() {
 
 int i;
 
-    out_sensors[57] = 1;
-    in_sensors[63] = 1;
-    stations[68] = 1;
-    preprocessing[64] = 1;
+    out_sensors[10] = 1;
+    in_sensors[16] = 1;
+    stations[18] = 1;
+    preprocessing[17] = 1;
+    max_len_queue[0] = 3;
 
-    out_sensors[72] = 2;
-    in_sensors[74] = 2;
-    stations[78] = 2;
-    preprocessing[75] = 2;
-
-    in_sensors[30] = 3;
-    stations[32] = 3;
-    preprocessing[31] = 3;
-
-    out_sensors[35] = 4;
-    in_sensors[37] = 4;
-    stations[39] = 4;
-    preprocessing[38] = 4;
-
-    out_sensors[17] = 5;
-    in_sensors[22] = 5;
-    stations[25] = 5;
-    preprocessing[23] = 5;
-
-    out_sensors[48] = 6;
-    in_sensors[52] = 6;
-    stations[53] = 6;
-    preprocessing[53] = 6;
-
+    in_sensors[23] = 2;
+    stations[25] = 2; //da provare con stazione 24
+    preprocessing[24] = 2;   
+    max_len_queue[1] = 2;
 
     for ( i = NUM_SLOTS-6; i &lt; NUM_PIECES + NUM_SLOTS-6; i++ ){
         belt[i] = 1;
@@ -95,7 +76,9 @@ int i;
 int processing_counter = 0;
 int in_sens_pos;
 int out_sens_pos;
-int next_id[2];
+int prev_stat_pos;
+int next_id;
+int prev_id;
 int len_queue_verifier;
 int processing_time;
 
@@ -138,21 +121,20 @@ void free_station(){
 
 void set_parameters(){
     int i;
-    next_id[0] = -1;
-    next_id[1] = -1;
     out_sens_pos = -1;
 
-    if (id == NUM_STATIONS - 1) next_id[0] = 0;
-    else if (id == 1){
-        next_id[0] = 2;
-        next_id[1] = 4;
-    }else if(id == 3) next_id[0] = 5;
-    else next_id[0] = id + 1;
+    if (id == NUM_STATIONS - 1) next_id = 0;
+    else next_id = id + 1;
+
+    if (id == 0) prev_id = NUM_STATIONS - 1;
+    else prev_id = id - 1;
 
     for ( i = 0; i &lt; NUM_SLOTS; i++ ){
         if (in_sensors[i] == id+1) in_sens_pos = i;
         if (out_sensors[i] == id+1) out_sens_pos = i;
+        if (stations[i] == prev_id+1) prev_stat_pos = i;
     }
+
 }
 
 void set_len_queue() {
