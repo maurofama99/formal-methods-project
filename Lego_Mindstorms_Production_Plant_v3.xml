@@ -96,12 +96,17 @@ int get_len_pre_processing() {
 }
 
 void update_preprocessing(){
-    status_preprocessing[id] = 1;
+    int i;
+    for (i = 0; i &lt; NUM_SLOTS; i++) {
+        if (preprocessing[i] == (id + 1) &amp;&amp; belt[i] == 1)  status_preprocessing[id] = 1;
+    }
+
     if (!belt[in_sens_pos]) status_in_sensors[id] = 0;
 }
 
 void free_preprocessing(){
     //status_stations[id] = 1;
+    
     status_preprocessing[id] = 0;
     processing_time = in_sens_pos*5;
 }
@@ -218,9 +223,13 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 		</location>
 		<init ref="id5"/>
 		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-399" y="-1113">status_preprocessing[id]  == 0</label>
+		</transition>
+		<transition>
 			<source ref="id8"/>
 			<target ref="id1"/>
-			<label kind="synchronisation" x="-416" y="-926">step?</label>
 			<label kind="assignment" x="-493" y="-892">update_preprocessing(), x=0</label>
 		</transition>
 		<transition>
@@ -507,7 +516,7 @@ void update_sensor_status(){
 		<transition>
 			<source ref="id16"/>
 			<target ref="id15"/>
-			<label kind="synchronisation" x="-85" y="17">enter_preprocessing[id]!</label>
+			<label kind="synchronisation" x="-93" y="25">enter_preprocessing[id]!</label>
 		</transition>
 		<transition>
 			<source ref="id15"/>

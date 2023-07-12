@@ -220,7 +220,7 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 		<transition>
 			<source ref="id8"/>
 			<target ref="id1"/>
-			<label kind="synchronisation" x="-416" y="-926">step?</label>
+			<label kind="synchronisation" x="-416" y="-935">step?</label>
 			<label kind="assignment" x="-493" y="-892">update_preprocessing(), x=0</label>
 		</transition>
 		<transition>
