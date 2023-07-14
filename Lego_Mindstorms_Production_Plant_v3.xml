@@ -122,7 +122,7 @@ int get_len_pre_processing() {
 void update_preprocessing(){
     int i;
     for (i = 0; i &lt; NUM_SLOTS; i++) {
-        if ((preprocessing[i] == (id + 1)||stations[i] == (id + 1)) &amp;&amp; belt[i] == 1)   status_preprocessing[id] = 1; // proabilmente controlli inutili
+        if ((preprocessing[i] == (id + 1)||stations[i] == (id + 1)) &amp;&amp; belt[i] == 1)   status_preprocessing[id] = 1; // probabilmente controlli inutili
     }
 
     if (!belt[in_sens_pos]) status_in_sensors[id] = 0;
@@ -224,7 +224,7 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<name x="-603" y="-1309">FREE</name>
 		</location>
 		<location id="id1" x="-552" y="-901">
-			<name x="-570" y="-875">PREPROCESSING</name>
+			<name x="-646" y="-875">PREPROCESSING</name>
 		</location>
 		<location id="id2" x="442" y="-1275">
 			<name x="459" y="-1275">WAIT</name>
@@ -234,7 +234,7 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<label kind="invariant" x="213" y="-867">y &lt;= processing_time</label>
 		</location>
 		<location id="id4" x="-228" y="-1275">
-			<name x="-289" y="-1249">AFTER_PROCESSING</name>
+			<name x="-365" y="-1317">AFTER_PROCESSING</name>
 		</location>
 		<location id="id5" x="-722" y="-1275">
 			<name x="-732" y="-1309">INIT</name>
@@ -324,8 +324,8 @@ next_id &gt;=0</label>
 		<transition>
 			<source ref="id4"/>
 			<target ref="id0"/>
-			<label kind="synchronisation" x="-476" y="-1351">step?</label>
-			<label kind="assignment" x="-476" y="-1334">processing_counter--, 
+			<label kind="synchronisation" x="-476" y="-1266">step?</label>
+			<label kind="assignment" x="-476" y="-1249">processing_counter--, 
 free_all(),
 len_queue[next_id]++</label>
 			<nail x="-374" y="-1275"/>
@@ -485,35 +485,35 @@ void shift() {
 
 
 </declaration>
-		<location id="id12" x="-1232" y="-1020">
+		<location id="id12" x="-25262" y="-3502">
 		</location>
-		<location id="id13" x="-1623" y="-1020">
-			<name x="-1633" y="-1054">INIT</name>
+		<location id="id13" x="-25653" y="-3502">
+			<name x="-25663" y="-3536">INIT</name>
 			<committed/>
 		</location>
-		<location id="id14" x="-1436" y="-943">
+		<location id="id14" x="-25466" y="-3425">
 			<committed/>
 		</location>
 		<init ref="id13"/>
 		<transition>
 			<source ref="id14"/>
 			<target ref="id12"/>
-			<label kind="synchronisation" x="-1418" y="-998">initialize!</label>
-			<label kind="assignment" x="-1419" y="-1020">update_belt_count()</label>
+			<label kind="synchronisation" x="-25448" y="-3480">initialize!</label>
+			<label kind="assignment" x="-25449" y="-3502">update_belt_count()</label>
 		</transition>
 		<transition>
 			<source ref="id13"/>
 			<target ref="id14"/>
-			<label kind="assignment" x="-1564" y="-1020">initializer()</label>
+			<label kind="assignment" x="-25594" y="-3502">initializer()</label>
 		</transition>
 		<transition>
 			<source ref="id12"/>
 			<target ref="id12"/>
-			<label kind="guard" x="-1181" y="-1045">x &gt;= 5</label>
-			<label kind="synchronisation" x="-1181" y="-1079">step!</label>
-			<label kind="assignment" x="-1181" y="-1062">shift(), update_belt_count(), counter_gate++, x = 0</label>
-			<nail x="-1028" y="-1020"/>
-			<nail x="-1232" y="-943"/>
+			<label kind="guard" x="-25211" y="-3527">x &gt;= 5</label>
+			<label kind="synchronisation" x="-25211" y="-3561">step!</label>
+			<label kind="assignment" x="-25211" y="-3544">shift(), update_belt_count(), counter_gate++, x = 0</label>
+			<nail x="-25058" y="-3502"/>
+			<nail x="-25262" y="-3425"/>
 		</transition>
 	</template>
 	<template>
