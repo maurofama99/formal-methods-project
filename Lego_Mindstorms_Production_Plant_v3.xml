@@ -138,6 +138,13 @@ void free_station(){
     status_stations[id] = 0;
 }
 
+bool check_outsensor(){
+    for(i = 0; i &lt; NUM_SLOTS; i++){
+        if (out_sensors[i] == id + 1) return 1;
+    }
+    return 0;
+}
+
 void set_parameters(){ //da sistemare per seconda branch
     int i, j, k;
     next_id = -1;
@@ -158,13 +165,21 @@ void set_parameters(){ //da sistemare per seconda branch
 
 
     for(i = 0; i &lt; NUM_SLOTS; i++){
-        if(out_sensors[i] == id + 1){
-            k = i; 
-            while(in_sensors[k] != id + 1){
+        if (check_outsensor()){
+            if(out_sensors[i] == id + 1){
+                k = i; 
+                while(in_sensors[k] != id + 1){
+                    max_len_queue[id]++;
+                    k++;
+                }
                 max_len_queue[id]++;
-                k++;
             }
-            max_len_queue[id]++;
+        } else {
+            max_len_queue[id] = -1;
+            /* Verificare la lunghezza della coda */
+            // se una stazione ha out sensor si conta, altrimenti: 
+            // verificando che una stazione non butta fuori il pezzetto quando il tile seguente è occupato (sempre verificato per costruzione della belt)
+            // dimostriamo che la coda non eccede mai la sua massima lunghezza (supponiamo che sia infinia se non presente out sensor)
         }
     }
     
@@ -381,7 +396,6 @@ void set_pos(){
 		<declaration>clock x;
 bool gate;
 int counter_gate;
-bool ghost_piece_detected = false;
 
 int get_index(){
     int i;
