@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int NUM_PIECES = 5; 
+	<declaration>const int NUM_PIECES = 3; 
 const int NUM_OUT_SENSORS = 2;
 const int NUM_SLOTS = 88;
 const int GATE_POS = 11;
@@ -96,7 +96,7 @@ int tmp_next_id;
 int next_id;
 int next_st;
 int next_id2;
-int len_queue_verifier;
+int len_queue;
 int processing_time;
 int pos_curr_station;
 
@@ -226,7 +226,7 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<label kind="invariant" x="213" y="-867">y &lt;= processing_time</label>
 		</location>
 		<location id="id4" x="-228" y="-1275">
-			<name x="-348" y="-1334">AFTER_PROCESSING</name>
+			<name x="-348" y="-1258">AFTER_PROCESSING</name>
 		</location>
 		<location id="id5" x="-722" y="-1275">
 			<name x="-732" y="-1309">INIT</name>
@@ -235,6 +235,7 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<committed/>
 		</location>
 		<location id="id7" x="-17" y="-1368">
+			<urgent/>
 		</location>
 		<location id="id8" x="-170" y="-901">
 			<urgent/>
@@ -260,9 +261,10 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 		<transition>
 			<source ref="id7"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-170" y="-1300">next_id2 == -1 ||
+			<label kind="guard" x="-204" y="-1411">next_id2 == -1 ||
 tmp_next_id == next_id2</label>
-			<label kind="synchronisation" x="-187" y="-1368">free_in_sensor[id]!</label>
+			<label kind="synchronisation" x="-204" y="-1360">free_in_sensor[id]!</label>
+			<label kind="assignment" x="-204" y="-1377">status_stations[id] = 0</label>
 		</transition>
 		<transition>
 			<source ref="id7"/>
@@ -274,9 +276,10 @@ tmp_next_id == next_id2</label>
 		<transition>
 			<source ref="id3"/>
 			<target ref="id4"/>
-			<label kind="guard" x="8" y="-1130">y &gt;= processing_time &amp;&amp;
+			<label kind="guard" x="-238" y="-1139">y &gt;= processing_time &amp;&amp;
 next_id == -1</label>
-			<label kind="synchronisation" x="-51" y="-1156">free_in_sensor[id]!</label>
+			<label kind="synchronisation" x="-238" y="-1156">free_in_sensor[id]!</label>
+			<label kind="assignment" x="-238" y="-1105">status_stations[id] = 0</label>
 		</transition>
 		<transition>
 			<source ref="id2"/>
@@ -311,8 +314,8 @@ next_id &gt;=0</label>
 		<transition>
 			<source ref="id4"/>
 			<target ref="id0"/>
-			<label kind="synchronisation" x="-399" y="-1300">step?</label>
-			<label kind="assignment" x="-433" y="-1266">processing_counter--, 
+			<label kind="synchronisation" x="-442" y="-1334">step?</label>
+			<label kind="assignment" x="-442" y="-1317">processing_counter--, 
 free_all()</label>
 			<nail x="-374" y="-1275"/>
 		</transition>
@@ -322,7 +325,7 @@ free_all()</label>
 			<label kind="guard" x="-119" y="-977">belt[pos_curr_station] == 1</label>
 			<label kind="assignment" x="-119" y="-960">free_preprocessing(), 
 processing_counter++, tmp_next_id = next_id,
-status_stations[id] = 1</label>
+status_stations[id] = 1, y = 0</label>
 			<nail x="246" y="-901"/>
 		</transition>
 	</template>
@@ -340,6 +343,7 @@ void set_pos(){
 
 }</declaration>
 		<location id="id9" x="-365" y="-144">
+			<committed/>
 		</location>
 		<location id="id10" x="-646" y="-144">
 		</location>
