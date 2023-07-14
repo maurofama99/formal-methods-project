@@ -96,7 +96,6 @@ int tmp_next_id;
 int next_id;
 int next_st;
 int next_id2;
-int len_queue;
 int processing_time;
 int pos_curr_station;
 
@@ -138,7 +137,8 @@ void free_station(){
     status_stations[id] = 0;
 }
 
-bool check_outsensor(){
+bool check_out_sensor(){
+    int i;
     for(i = 0; i &lt; NUM_SLOTS; i++){
         if (out_sensors[i] == id + 1) return 1;
     }
@@ -149,7 +149,6 @@ void set_parameters(){ //da sistemare per seconda branch
     int i, j, k;
     next_id = -1;
     next_id2 = -1;
-
 
     for(j = 0; j &lt; NUM_SLOTS; j++){
         if(in_sensors[j] == id + 1){
@@ -165,7 +164,7 @@ void set_parameters(){ //da sistemare per seconda branch
 
 
     for(i = 0; i &lt; NUM_SLOTS; i++){
-        if (check_outsensor()){
+        if (check_out_sensor()){
             if(out_sensors[i] == id + 1){
                 k = i; 
                 while(in_sensors[k] != id + 1){
@@ -241,7 +240,7 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<label kind="invariant" x="213" y="-867">y &lt;= processing_time</label>
 		</location>
 		<location id="id4" x="-228" y="-1275">
-			<name x="-348" y="-1258">AFTER_PROCESSING</name>
+			<name x="-289" y="-1249">AFTER_PROCESSING</name>
 		</location>
 		<location id="id5" x="-722" y="-1275">
 			<name x="-732" y="-1309">INIT</name>
@@ -271,7 +270,8 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<source ref="id0"/>
 			<target ref="id1"/>
 			<label kind="synchronisation" x="-739" y="-1062">enter_preprocessing[id]?</label>
-			<label kind="assignment" x="-739" y="-1045">update_preprocessing()</label>
+			<label kind="assignment" x="-739" y="-1045">update_preprocessing(), 
+len_queue[id]--</label>
 		</transition>
 		<transition>
 			<source ref="id7"/>
@@ -329,9 +329,10 @@ next_id &gt;=0</label>
 		<transition>
 			<source ref="id4"/>
 			<target ref="id0"/>
-			<label kind="synchronisation" x="-442" y="-1334">step?</label>
-			<label kind="assignment" x="-442" y="-1317">processing_counter--, 
-free_all()</label>
+			<label kind="synchronisation" x="-476" y="-1351">step?</label>
+			<label kind="assignment" x="-476" y="-1334">processing_counter--, 
+free_all(),
+len_queue[next_id]++</label>
 			<nail x="-374" y="-1275"/>
 		</transition>
 		<transition>
@@ -602,7 +603,7 @@ void update_sensor_status(){
 			<comment>It never happens that a station holds more than 1 piece</comment>
 		</query>
 		<query>
-			<formula>A[] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i]</formula>
+			<formula>A[] forall (i:id_s) (max_len_queue[i] &gt; -1) imply (len_queue[i] &lt;= max_len_queue[i])</formula>
 			<comment>no queue ever exceeds the maximum allowed length</comment>
 		</query>
 	</queries>
