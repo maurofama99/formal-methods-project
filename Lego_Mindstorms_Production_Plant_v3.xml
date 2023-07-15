@@ -485,35 +485,37 @@ void shift() {
 
 
 </declaration>
-		<location id="id12" x="-25262" y="-3502">
+		<location id="id12" x="-26027" y="-26554">
+			<name x="-26018" y="-26537">MOVE</name>
+			<label kind="invariant" x="-26061" y="-26588">x &lt;= 10</label>
 		</location>
-		<location id="id13" x="-25653" y="-3502">
-			<name x="-25663" y="-3536">INIT</name>
+		<location id="id13" x="-26401" y="-26503">
+			<name x="-26411" y="-26537">INIT</name>
 			<committed/>
 		</location>
-		<location id="id14" x="-25466" y="-3425">
+		<location id="id14" x="-26214" y="-26426">
 			<committed/>
 		</location>
 		<init ref="id13"/>
 		<transition>
 			<source ref="id14"/>
 			<target ref="id12"/>
-			<label kind="synchronisation" x="-25448" y="-3480">initialize!</label>
-			<label kind="assignment" x="-25449" y="-3502">update_belt_count()</label>
+			<label kind="synchronisation" x="-26205" y="-26511">initialize!</label>
+			<label kind="assignment" x="-26222" y="-26528">update_belt_count()</label>
 		</transition>
 		<transition>
 			<source ref="id13"/>
 			<target ref="id14"/>
-			<label kind="assignment" x="-25594" y="-3502">initializer()</label>
+			<label kind="assignment" x="-26342" y="-26503">initializer()</label>
 		</transition>
 		<transition>
 			<source ref="id12"/>
 			<target ref="id12"/>
-			<label kind="guard" x="-25211" y="-3527">x &gt;= 5</label>
-			<label kind="synchronisation" x="-25211" y="-3561">step!</label>
-			<label kind="assignment" x="-25211" y="-3544">shift(), update_belt_count(), counter_gate++, x = 0</label>
-			<nail x="-25058" y="-3502"/>
-			<nail x="-25262" y="-3425"/>
+			<label kind="guard" x="-25976" y="-26579">x &gt;= 5</label>
+			<label kind="synchronisation" x="-25976" y="-26613">step!</label>
+			<label kind="assignment" x="-25976" y="-26596">shift(), update_belt_count(), counter_gate++, x = 0</label>
+			<nail x="-25823" y="-26554"/>
+			<nail x="-26027" y="-26477"/>
 		</transition>
 	</template>
 	<template>

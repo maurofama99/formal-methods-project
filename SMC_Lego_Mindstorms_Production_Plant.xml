@@ -2,20 +2,21 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>const int NUM_PIECES = 5; 
-const int NUM_OUT_SENSORS = 1;
-const int NUM_SLOTS = 40;
-const int GATE_POS = 5;
-const int FIRST_POS_BELT2 = 14;
-const int LAST_POS_BELT2 = 19;
+const int NUM_SLOTS = 88;
+const int GATE_POS = 11;
+const int FIRST_POS_BELT2 = 29;
+const int LAST_POS_BELT2 = 42;
+const int RULE_CONTROLLER = 10;
 
 /** Change this to modify number of stations and input sensors **/
-            const int NUM_STATIONS = 2;
-            const int NUM_IN_SENSORS = 2;
+            const int NUM_STATIONS = 6;
+            const int NUM_IN_SENSORS = 6;
+            const int NUM_OUT_SENSORS = 5;
 /****************************************************************/
 
 typedef int[0, NUM_STATIONS-1] id_s;
 typedef int[0, NUM_IN_SENSORS-1] id_sens;
-typedef int[0, NUM_OUT_SENSORS-1] id_outsens;
+typedef int[0, NUM_IN_SENSORS-1] id_outsens;
 
 bool belt[NUM_SLOTS];
 int stations[NUM_SLOTS];
@@ -27,9 +28,10 @@ bool status_in_sensors[NUM_IN_SENSORS];
 bool status_stations[NUM_STATIONS];
 bool status_preprocessing[NUM_STATIONS];
 
-broadcast chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS], check_outsensor[NUM_IN_SENSORS], busy[NUM_OUT_SENSORS], free[NUM_OUT_SENSORS];
-broadcast chan step, initialize;
+broadcast chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS], check_outsensor[NUM_IN_SENSORS], busy[NUM_IN_SENSORS], free[NUM_IN_SENSORS];
+broadcast chan initialize, step;
 
+int previous_station[NUM_STATIONS];
 int max_len_queue[NUM_STATIONS];
 int len_queue[NUM_STATIONS];
 
@@ -45,23 +47,50 @@ void update_belt_count() {
     }
 }
 
+/** ASSUMPTION **/
+/* Non ci possono essere casi ambigui, se una stazione ha due predecessori (biforcazione) DEVE avere un output sensor */
 void initializer() {
 
-int i;
+    int i;
 
-    out_sensors[10] = 1;
-    in_sensors[16] = 1;
-    stations[18] = 1;
+    out_sensors[57] = 1;
+    in_sensors[63] = 1;
+    stations[68] = 1;
+    previous_station[0] = 53;
+    max_len_queue[0] = abs(63 - 53 + 1); // input sensor - previous station + 1
 
-    in_sensors[23] = 2;
-    stations[25] = 2; //da provare con stazione 24
+    out_sensors[72] = 2;
+    in_sensors[74] = 2;
+    stations[78] = 2;
+    previous_station[1] = 68;
+    max_len_queue[1] = abs(74 - 68 + 1);
+
+    stations[32] = 3;
+    in_sensors[30] = 3;
+    previous_station[2] = 78;
+    max_len_queue[2] = abs(30 - 78 + 1);
     
+    out_sensors[35] = 4;
+    in_sensors[37] = 4;
+    stations[39] = 4;
+    previous_station[3] = 32;
+    max_len_queue[3] = abs(37 - 32 + 1);
 
-    for ( i = NUM_SLOTS-6; i &lt; NUM_PIECES + NUM_SLOTS - 6 -1; i++ ){
+    out_sensors[19] = 5;
+    in_sensors[22] = 5;
+    stations[25] = 5;
+    previous_station[4] = 78;
+    max_len_queue[4] = abs(22 - 78 + 1);
+
+    out_sensors[48] = 6;
+    in_sensors[52] = 6;
+    stations[54] = 6;
+    previous_station[5] = 25;
+    max_len_queue[5] = abs(52 - 25 + 1);    
+
+    for ( i = 58; i &lt; NUM_PIECES + 58; i++ ){
         belt[i] = 1;
-    }
-    belt[14] = 1;
-    
+    }    
 
 }
 
@@ -81,10 +110,6 @@ int next_st;
 int next_id2;
 int processing_time;
 int pos_curr_station;
-
-void dequeue() {
-    if (len_queue[id] &gt; 0) len_queue[id]--;
-}
 
 int get_len_pre_processing() {
     int i, station, sensor;
@@ -152,8 +177,6 @@ void set_parameters(){ //da sistemare per seconda branch
             }
     }
     
-    /** FIXME: NOT WORKING **/
-    // next_id still "-1" when out sensor not present
     for(i = pos_curr_station; i &lt; NUM_SLOTS; i++){
 
         if(i == NUM_SLOTS - 1) i = 0;
@@ -202,10 +225,12 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<name x="-603" y="-1309">FREE</name>
 		</location>
 		<location id="id1" x="-236" y="-901">
+			<name x="-272" y="-884">WAIT_STEP</name>
 			<urgent/>
 		</location>
 		<location id="id2" x="442" y="-1275">
 			<name x="459" y="-1275">WAIT</name>
+			<label kind="exponentialrate" x="433" y="-1258">1</label>
 		</location>
 		<location id="id3" x="264" y="-901">
 			<name x="230" y="-884">PROCESSING</name>
@@ -218,9 +243,10 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<name x="-732" y="-1309">INIT</name>
 		</location>
 		<location id="id6" x="263" y="-1275">
-			<committed/>
+			<name x="280" y="-1266">WAIT_CHECK</name>
 		</location>
 		<location id="id7" x="-17" y="-1368">
+			<name x="-27" y="-1402">WAIT_FREE</name>
 			<urgent/>
 		</location>
 		<location id="id8" x="-552" y="-901">
@@ -242,8 +268,7 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<source ref="id0"/>
 			<target ref="id8"/>
 			<label kind="synchronisation" x="-722" y="-1139">enter_preprocessing[id]?</label>
-			<label kind="assignment" x="-722" y="-1122">update_preprocessing(), 
-dequeue()</label>
+			<label kind="assignment" x="-722" y="-1122">update_preprocessing()</label>
 		</transition>
 		<transition>
 			<source ref="id7"/>
@@ -303,8 +328,7 @@ next_id &gt;=0</label>
 			<target ref="id0"/>
 			<label kind="synchronisation" x="-493" y="-1258">step?</label>
 			<label kind="assignment" x="-493" y="-1241">processing_counter--,
-free_all(),
-len_queue[next_id]++</label>
+free_all()</label>
 		</transition>
 		<transition>
 			<source ref="id1"/>
@@ -334,7 +358,8 @@ void set_pos(){
 
 }</declaration>
 		<location id="id9" x="-569" y="-161">
-			<committed/>
+			<name x="-579" y="-195">CHECK</name>
+			<urgent/>
 		</location>
 		<location id="id10" x="-850" y="-161">
 			<name x="-952" y="-187">WAIT_CHECK</name>
@@ -343,9 +368,11 @@ void set_pos(){
 		</location>
 		<location id="id12" x="-374" y="-272">
 			<name x="-357" y="-280">SENSOR_MALFUNCTION</name>
+			<label kind="exponentialrate" x="-365" y="-306">1</label>
 		</location>
 		<location id="id13" x="-374" y="-51">
 			<name x="-349" y="-59">SENSOR_WORKING</name>
+			<label kind="exponentialrate" x="-365" y="-34">1</label>
 		</location>
 		<branchpoint id="id14" x="-476" y="-161">
 		</branchpoint>
@@ -400,8 +427,7 @@ void set_pos(){
 			<target ref="id10"/>
 			<label kind="guard" x="-714" y="-34">belt[out_sensor_pos] == 0</label>
 			<label kind="synchronisation" x="-714" y="-17">free[id]!</label>
-			<nail x="-374" y="-42"/>
-			<nail x="-714" y="-42"/>
+			<nail x="-714" y="-51"/>
 		</transition>
 		<transition>
 			<source ref="id10"/>
@@ -427,6 +453,51 @@ int get_index(){
     return NUM_SLOTS;
 }
 
+// return position of in sensor
+int get_in_sens_position(int id){
+    int i;
+
+    for (i = 0; i &lt; NUM_SLOTS; i++) {
+        if (in_sensors[i] == id+1) return i;
+    }
+    return -2;
+}
+
+// return position of out sensor if present, otherwise return -1
+int get_out_sens_position(int id){
+    int i;
+
+    for (i = 0; i &lt; NUM_SLOTS; i++) {
+        if (out_sensors[i] == id+1) return i;
+    }
+    return -1;
+}
+
+void set_len_queue(){
+    int i, j;
+    int out_sens_pos;
+    int in_sens_pos;
+    int count;
+    
+    for (j = 0; j &lt; NUM_STATIONS; j++){
+        out_sens_pos = get_out_sens_position(j);
+        in_sens_pos = get_in_sens_position(j);
+        count = 0;
+
+        if (out_sens_pos != -1){ // out_sensor present
+            for (i = out_sens_pos; i &lt;= in_sens_pos; i++){
+                if (belt[i]) count ++;
+            }
+        } else { // out_sensor not present, counting from previous station
+            for (i = previous_station[j]; i &lt;= in_sens_pos; i++){
+                if (belt[i]) count ++;
+            }
+        }
+        len_queue[j] = count;
+    }  
+
+}
+
 void shift() {
     int next, prec, i, tmp, tmpfirst, first_index;
 
@@ -446,7 +517,7 @@ void shift() {
         else next = i+1;
 
         if(i == GATE_POS){
-            if(counter_gate%10){
+            if(counter_gate%RULE_CONTROLLER){
                 gate = true;
             }else{
                 gate = false;
@@ -474,11 +545,11 @@ void shift() {
                 belt[next] = belt[prec];
                 belt[prec] = tmp;
                 // status_stations[stations[next]-1] = 1;
-            } else if (in_sensors[next] &gt; 0){
+            } else if (in_sensors[next] &gt; 0 &amp;&amp; !status_in_sensors[in_sensors[next]-1]){
                 tmp = belt[next];
                 belt[next] = belt[prec];
                 belt[prec] = tmp;
-                //status_in_sensors[in_sensors[next]-1] = 1;   
+                // status_in_sensors[in_sensors[next]-1] = 1;
             } else if(in_sensors[prec] &gt; 0 &amp;&amp; !status_preprocessing[in_sensors[prec]-1] &amp;&amp; !status_stations[in_sensors[prec]-1]){
                 tmp = belt[next];
                 belt[next] = belt[prec];
@@ -511,30 +582,35 @@ void shift() {
 			<committed/>
 		</location>
 		<location id="id16" x="-595" y="0">
+			<name x="-620" y="17">READY</name>
 			<committed/>
 		</location>
 		<location id="id17" x="-391" y="-127">
+			<name x="-401" y="-161">MOVE</name>
+			<label kind="invariant" x="-416" y="-102">x  &lt;= 10</label>
 		</location>
 		<init ref="id15"/>
 		<transition>
 			<source ref="id17"/>
 			<target ref="id17"/>
-			<label kind="guard" x="-331" y="-161">x &gt;= 5</label>
-			<label kind="synchronisation" x="-331" y="-144">step!</label>
-			<label kind="assignment" x="-331" y="-127">shift(), update_belt_count(), counter_gate++, x = 0</label>
-			<nail x="-188" y="-51"/>
-			<nail x="-332" y="59"/>
+			<label kind="guard" x="-212" y="-178">x &gt;= 5</label>
+			<label kind="synchronisation" x="-212" y="-161">step!</label>
+			<label kind="assignment" x="-212" y="-144">shift(), 
+counter_gate++, x = 0,
+update_belt_count(),
+set_len_queue()</label>
+			<nail x="-229" y="-187"/>
+			<nail x="-229" y="-76"/>
 		</transition>
 		<transition>
 			<source ref="id16"/>
 			<target ref="id17"/>
-			<label kind="synchronisation" x="-620" y="-119">initialize!</label>
-			<label kind="assignment" x="-620" y="-102">update_belt_count()</label>
+			<label kind="synchronisation" x="-552" y="-85">initialize!</label>
 		</transition>
 		<transition>
 			<source ref="id15"/>
 			<target ref="id16"/>
-			<label kind="assignment" x="-747" y="-46">initializer()</label>
+			<label kind="assignment" x="-867" y="-17">initializer(), update_belt_count()</label>
 		</transition>
 	</template>
 	<template>
@@ -558,145 +634,134 @@ void set_pos(){
 void update_sensor_status(bool status){
     status_in_sensors[id] = status;
 }</declaration>
-		<location id="id18" x="-399" y="-93">
-			<name x="-416" y="-127">FREE</name>
+		<location id="id18" x="-535" y="-93">
+			<name x="-552" y="-127">FREE</name>
 		</location>
-		<location id="id19" x="17" y="-93">
+		<location id="id19" x="-748" y="-93">
+			<name x="-758" y="-127">INIT</name>
 		</location>
-		<location id="id20" x="-612" y="-93">
-			<name x="-622" y="-127">INIT</name>
-		</location>
-		<location id="id21" x="17" y="-238">
+		<location id="id20" x="17" y="-238">
 			<name x="0" y="-272">BUSY</name>
 		</location>
-		<location id="id22" x="-263" y="119">
+		<location id="id21" x="-263" y="280">
+			<name x="-306" y="297">FAKE_BUSY</name>
 		</location>
-		<location id="id23" x="-263" y="280">
-		</location>
-		<location id="id24" x="76" y="17">
+		<location id="id22" x="76" y="17">
 			<name x="51" y="34">ERROR</name>
-			<committed/>
 		</location>
-		<location id="id25" x="-263" y="-93">
+		<location id="id23" x="-263" y="-93">
 			<urgent/>
 		</location>
-		<location id="id26" x="425" y="-93">
+		<location id="id24" x="425" y="-93">
+			<name x="450" y="-93">WAIT</name>
 		</location>
-		<location id="id27" x="425" y="-238">
+		<location id="id25" x="425" y="-238">
 			<urgent/>
 		</location>
-		<location id="id28" x="-399" y="280">
-			<name x="-442" y="297">FAKE_BUSY</name>
+		<location id="id26" x="-535" y="280">
 			<urgent/>
 		</location>
-		<branchpoint id="id29" x="-263" y="178">
+		<branchpoint id="id27" x="-263" y="178">
 		</branchpoint>
-		<branchpoint id="id30" x="76" y="-93">
+		<branchpoint id="id28" x="76" y="-93">
 		</branchpoint>
-		<init ref="id20"/>
+		<init ref="id19"/>
 		<transition>
-			<source ref="id28"/>
-			<target ref="id18"/>
-			<label kind="assignment" x="-620" y="85">update_sensor_status(false)</label>
+			<source ref="id23"/>
+			<target ref="id27"/>
+			<label kind="guard" x="-246" y="42">belt[in_sensor_pos] == 0</label>
 		</transition>
 		<transition>
 			<source ref="id23"/>
 			<target ref="id28"/>
-			<label kind="synchronisation" x="-348" y="255">step?</label>
-		</transition>
-		<transition>
-			<source ref="id27"/>
-			<target ref="id21"/>
-			<label kind="synchronisation" x="136" y="-263">enter_preprocessing[id]!</label>
+			<label kind="guard" x="-170" y="-119">belt[in_sensor_pos] == 1</label>
 		</transition>
 		<transition>
 			<source ref="id26"/>
-			<target ref="id27"/>
+			<target ref="id18"/>
+			<label kind="assignment" x="-756" y="93">update_sensor_status(false)</label>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id26"/>
+			<label kind="synchronisation" x="-416" y="263">step?</label>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="136" y="-263">enter_preprocessing[id]!</label>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id25"/>
 			<label kind="synchronisation" x="433" y="-170">step?</label>
 		</transition>
 		<transition>
 			<source ref="id18"/>
-			<target ref="id25"/>
+			<target ref="id23"/>
 			<label kind="synchronisation" x="-348" y="-93">step?</label>
 		</transition>
 		<transition>
-			<source ref="id29"/>
+			<source ref="id27"/>
 			<target ref="id18"/>
-			<label kind="probability" x="-306" y="144">99</label>
+			<label kind="probability" x="-450" y="144">100 - error_probability</label>
 		</transition>
 		<transition>
-			<source ref="id29"/>
-			<target ref="id23"/>
-			<label kind="assignment" x="-255" y="229">update_sensor_status(true)</label>
-			<label kind="probability" x="-255" y="203">1</label>
+			<source ref="id27"/>
+			<target ref="id21"/>
+			<label kind="assignment" x="-246" y="221">update_sensor_status(true)</label>
+			<label kind="probability" x="-246" y="204">error_probability</label>
 		</transition>
 		<transition>
-			<source ref="id22"/>
-			<target ref="id29"/>
-		</transition>
-		<transition>
-			<source ref="id25"/>
-			<target ref="id22"/>
-			<label kind="guard" x="-246" y="8">belt[in_sensor_pos] == 0</label>
-		</transition>
-		<transition>
-			<source ref="id30"/>
-			<target ref="id26"/>
-			<label kind="assignment" x="161" y="-119">update_sensor_status(true)</label>
-			<label kind="probability" x="93" y="-119">99</label>
-		</transition>
-		<transition>
-			<source ref="id30"/>
+			<source ref="id28"/>
 			<target ref="id24"/>
-			<label kind="probability" x="59" y="-76">1</label>
+			<label kind="assignment" x="170" y="-85">update_sensor_status(true)</label>
+			<label kind="probability" x="161" y="-119">100 - error_probability</label>
+		</transition>
+		<transition>
+			<source ref="id28"/>
+			<target ref="id22"/>
+			<label kind="probability" x="-42" y="-51">error_probability</label>
 		</transition>
 		<transition>
 			<source ref="id19"/>
-			<target ref="id30"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="-688" y="-127">initialize?</label>
+			<label kind="assignment" x="-688" y="-110">set_pos()</label>
 		</transition>
 		<transition>
 			<source ref="id20"/>
 			<target ref="id18"/>
-			<label kind="synchronisation" x="-552" y="-127">initialize?</label>
-			<label kind="assignment" x="-552" y="-110">set_pos()</label>
-		</transition>
-		<transition>
-			<source ref="id25"/>
-			<target ref="id19"/>
-			<label kind="guard" x="-195" y="-119">belt[in_sensor_pos] == 1</label>
-		</transition>
-		<transition>
-			<source ref="id21"/>
-			<target ref="id18"/>
 			<label kind="synchronisation" x="-289" y="-204">free_in_sensor[id]?</label>
 		</transition>
 	</template>
-	<system>system Processing_Station, Conveyor_Belt, Sensor, Out_sensor;</system>
+	<system>out_sensor0 = Out_sensor(0);
+out_sensor1 = Out_sensor(1);
+out_sensor2 = Out_sensor(2);
+out_sensor4 = Out_sensor(4);
+out_sensor5 = Out_sensor(5);
+
+system Processing_Station, Conveyor_Belt, Sensor, out_sensor1, out_sensor2, out_sensor0, out_sensor4, out_sensor5;</system>
 	<queries>
 		<query>
-			<formula>A[] not deadlock</formula>
-			<comment>The plant never incurs in deadlock</comment>
+			<formula></formula>
+			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=500](&lt;&gt; forall(i:id_s) Sensor(i).ERROR || forall (i: id_s) Processing_Station(i).processing_counter &gt; 1)</formula>
+			<formula>Pr[&lt;=500]([] forall(i:id_s) Sensor(i).ERROR || forall (i: id_s) Processing_Station(i).processing_counter &gt; 1)</formula>
 			<comment>It never happens that a station holds more than 1 piece </comment>
 		</query>
 		<query>
-			<formula>A[] !Conveyor_Belt.INIT imply belt_count == NUM_PIECES
-</formula>
+			<formula>Pr[&lt;=1000] ([] (!Conveyor_Belt.INIT &amp;&amp; belt_count == NUM_PIECES) ^ (Conveyor_Belt.INIT &amp;&amp; belt_count == 0))</formula>
 			<comment>It never happens that two pieces occupy the same belt slot</comment>
 		</query>
 		<query>
-			<formula>A[] forall (i: id_s) Processing_Station(i).processing_counter &lt;= 1</formula>
+			<formula>Pr[&lt;=1000] ([] forall (i: id_s) Processing_Station(i).processing_counter &lt;= 1)</formula>
 			<comment>It never happens that a station holds more than 1 piece</comment>
 		</query>
 		<query>
-			<formula>A[] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i]</formula>
+			<formula>Pr[&lt;=1000] ([] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i])</formula>
 			<comment>no queue ever exceeds the maximum allowed length</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=300]{belt[24], belt[25], belt[26], Processing_Station(1).FREE,  Processing_Station(1).PROCESSING, Processing_Station(1).PREPROCESSING, Sensor(1).BUSY, Sensor(1).FREE,Sensor(1).FAKE_BUSY}</formula>
-			<comment></comment>
 		</query>
 		<query>
 			<formula>Pr[&lt;=1000; 200](&lt;&gt; forall (i:id_s) Sensor(i).FAKE_BUSY)</formula>
