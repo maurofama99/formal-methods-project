@@ -2,21 +2,22 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>const int NUM_PIECES = 3; 
-const int NUM_OUT_SENSORS = 2;
 const int NUM_SLOTS = 88;
 const int GATE_POS = 11;
 const int FIRST_POS_BELT2 = 29;
 const int LAST_POS_BELT2 = 42;
-
+const int RULE_CONTROLLER = 10;
 
 /** Change this to modify number of stations and input sensors **/
-            const int NUM_STATIONS = 3;
-            const int NUM_IN_SENSORS = 3;
+            const int NUM_STATIONS = 6;
+            const int NUM_IN_SENSORS = 6;
+            const int NUM_OUT_SENSORS = 5;
 /****************************************************************/
 
+// time required for an entire loop: 746,92
 typedef int[0, NUM_STATIONS-1] id_s;
 typedef int[0, NUM_IN_SENSORS-1] id_sens;
-typedef int[0, NUM_OUT_SENSORS-1] id_outsens;
+typedef int[0, NUM_IN_SENSORS-1] id_outsens;
 
 bool belt[NUM_SLOTS];
 int stations[NUM_SLOTS];
@@ -28,9 +29,10 @@ bool status_in_sensors[NUM_IN_SENSORS];
 bool status_stations[NUM_STATIONS];
 bool status_preprocessing[NUM_STATIONS];
 
-chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS], check_outsensor[NUM_IN_SENSORS], busy[NUM_OUT_SENSORS], free[NUM_OUT_SENSORS];
+broadcast chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS], check_outsensor[NUM_IN_SENSORS], busy[NUM_IN_SENSORS], free[NUM_IN_SENSORS];
 broadcast chan initialize, step;
 
+int previous_station[NUM_STATIONS];
 int max_len_queue[NUM_STATIONS];
 int len_queue[NUM_STATIONS];
 
@@ -48,38 +50,42 @@ void update_belt_count() {
 
 void initializer() {
 
-int i;
-
-    // nota su max_len_queue: se presenti due stazioni precedenti -&gt; worst case
+    int i;
 
     out_sensors[57] = 1;
     in_sensors[63] = 1;
     stations[68] = 1;
-    max_len_queue[0] = abs(63 - 32 + 1); // input sensor - previous station + 1
+    previous_station[0] = 53;
+    max_len_queue[0] = abs(63 - 53 + 1); // input sensor - previous station + 1
 
-    out_sensors[72] = 2;
+    out_sensors[71] = 2;
     in_sensors[74] = 2;
     stations[78] = 2;
+    previous_station[1] = 68;
     max_len_queue[1] = abs(74 - 68 + 1);
 
     stations[32] = 3;
     in_sensors[30] = 3;
+    previous_station[2] = 78;
     max_len_queue[2] = abs(30 - 78 + 1);
-
-    /*
-    out_sensors[35] = 4;
+    
+    out_sensors[34] = 4;
     in_sensors[37] = 4;
     stations[39] = 4;
+    previous_station[3] = 32;
+    max_len_queue[3] = abs(37 - 32 + 1);
 
     out_sensors[19] = 5;
     in_sensors[22] = 5;
     stations[25] = 5;
+    previous_station[4] = 78;
+    max_len_queue[4] = abs(22 - 78 + 1);
 
     out_sensors[48] = 6;
     in_sensors[52] = 6;
     stations[54] = 6;
-    */
-    
+    previous_station[5] = 25;
+    max_len_queue[5] = abs(52 - 25 + 1);    
 
     for ( i = 58; i &lt; NUM_PIECES + 58; i++ ){
         belt[i] = 1;
@@ -103,10 +109,6 @@ int next_st;
 int next_id2;
 int processing_time;
 int pos_curr_station;
-
-void dequeue() {
-    if (len_queue[id] &gt; 0) len_queue[id]--;
-}
 
 int get_len_pre_processing() {
     int i, station, sensor;
@@ -174,8 +176,6 @@ void set_parameters(){ //da sistemare per seconda branch
             }
     }
     
-    /** FIXME: NOT WORKING **/
-    // next_id still "-1" when out sensor not present
     for(i = pos_curr_station; i &lt; NUM_SLOTS; i++){
 
         if(i == NUM_SLOTS - 1) i = 0;
@@ -265,8 +265,7 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 			<source ref="id0"/>
 			<target ref="id1"/>
 			<label kind="synchronisation" x="-739" y="-1062">enter_preprocessing[id]?</label>
-			<label kind="assignment" x="-739" y="-1045">update_preprocessing(), 
-dequeue()</label>
+			<label kind="assignment" x="-739" y="-1045">update_preprocessing()</label>
 		</transition>
 		<transition>
 			<source ref="id7"/>
@@ -326,8 +325,7 @@ next_id &gt;=0</label>
 			<target ref="id0"/>
 			<label kind="synchronisation" x="-476" y="-1266">step?</label>
 			<label kind="assignment" x="-476" y="-1249">processing_counter--, 
-free_all(),
-len_queue[next_id]++</label>
+free_all()</label>
 			<nail x="-374" y="-1275"/>
 		</transition>
 		<transition>
@@ -406,6 +404,51 @@ int get_index(){
     return NUM_SLOTS;
 }
 
+// return position of in sensor
+int get_in_sens_position(int id){
+    int i;
+
+    for (i = 0; i &lt; NUM_SLOTS; i++) {
+        if (in_sensors[i] == id+1) return i;
+    }
+    return -2;
+}
+
+// return position of out sensor if present, otherwise return -1
+int get_out_sens_position(int id){
+    int i;
+
+    for (i = 0; i &lt; NUM_SLOTS; i++) {
+        if (out_sensors[i] == id+1) return i;
+    }
+    return -1;
+}
+
+void set_len_queue(){
+    int i, j;
+    int out_sens_pos;
+    int in_sens_pos;
+    int count;
+    
+    for (j = 0; j &lt; NUM_STATIONS; j++){
+        out_sens_pos = get_out_sens_position(j);
+        in_sens_pos = get_in_sens_position(j);
+        count = 0;
+
+        if (out_sens_pos != -1){ // out_sensor present
+            for (i = out_sens_pos; i &lt;= in_sens_pos; i++){
+                if (belt[i]) count ++;
+            }
+        } else { // out_sensor not present, counting from previous station
+            for (i = previous_station[j]; i &lt;= in_sens_pos; i++){
+                if (belt[i]) count ++;
+            }
+        }
+        len_queue[j] = count;
+    }  
+
+}
+
 void shift() {
     int next, prec, i, tmp, tmpfirst, first_index;
 
@@ -425,7 +468,7 @@ void shift() {
         else next = i+1;
 
         if(i == GATE_POS){
-            if(counter_gate%10){
+            if(counter_gate%RULE_CONTROLLER){
                 gate = true;
             }else{
                 gate = false;
@@ -453,11 +496,11 @@ void shift() {
                 belt[next] = belt[prec];
                 belt[prec] = tmp;
                 // status_stations[stations[next]-1] = 1;
-            } else if (in_sensors[next] &gt; 0){
+            } else if (in_sensors[next] &gt; 0 &amp;&amp; !status_in_sensors[in_sensors[next]-1]){
                 tmp = belt[next];
                 belt[next] = belt[prec];
                 belt[prec] = tmp;
-                //status_in_sensors[in_sensors[next]-1] = 1;   
+                // status_in_sensors[in_sensors[next]-1] = 1;
             } else if(in_sensors[prec] &gt; 0 &amp;&amp; !status_preprocessing[in_sensors[prec]-1] &amp;&amp; !status_stations[in_sensors[prec]-1]){
                 tmp = belt[next];
                 belt[next] = belt[prec];
@@ -486,7 +529,7 @@ void shift() {
 
 </declaration>
 		<location id="id12" x="-26027" y="-26554">
-			<name x="-26018" y="-26537">MOVE</name>
+			<name x="-26052" y="-26528">MOVE</name>
 			<label kind="invariant" x="-26061" y="-26588">x &lt;= 10</label>
 		</location>
 		<location id="id13" x="-26401" y="-26503">
@@ -511,11 +554,14 @@ void shift() {
 		<transition>
 			<source ref="id12"/>
 			<target ref="id12"/>
-			<label kind="guard" x="-25976" y="-26579">x &gt;= 5</label>
-			<label kind="synchronisation" x="-25976" y="-26613">step!</label>
-			<label kind="assignment" x="-25976" y="-26596">shift(), update_belt_count(), counter_gate++, x = 0</label>
-			<nail x="-25823" y="-26554"/>
-			<nail x="-26027" y="-26477"/>
+			<label kind="guard" x="-25848" y="-26486">x &gt;= 5</label>
+			<label kind="synchronisation" x="-25848" y="-26469">step!</label>
+			<label kind="assignment" x="-25848" y="-26452">shift(), 
+counter_gate++, x = 0,
+update_belt_count(),
+set_len_queue()</label>
+			<nail x="-25746" y="-26537"/>
+			<nail x="-25950" y="-26460"/>
 		</transition>
 	</template>
 	<template>
@@ -594,7 +640,13 @@ void update_sensor_status(){
 			<label kind="synchronisation" x="-399" y="51">free_in_sensor[id]?</label>
 		</transition>
 	</template>
-	<system>system Processing_Station, Conveyor_Belt, Sensor, Out_sensor;</system>
+	<system>out_sensor0 = Out_sensor(0);
+out_sensor1 = Out_sensor(1);
+out_sensor2 = Out_sensor(2);
+out_sensor4 = Out_sensor(4);
+out_sensor5 = Out_sensor(5);
+
+system Processing_Station, Conveyor_Belt, Sensor, out_sensor1, out_sensor2, out_sensor0, out_sensor4, out_sensor5;</system>
 	<queries>
 		<query>
 			<formula>A[] not deadlock</formula>
