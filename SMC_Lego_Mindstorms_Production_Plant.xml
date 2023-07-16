@@ -47,8 +47,6 @@ void update_belt_count() {
     }
 }
 
-/** ASSUMPTION **/
-/* Non ci possono essere casi ambigui, se una stazione ha due predecessori (biforcazione) DEVE avere un output sensor */
 void initializer() {
 
     int i;
@@ -90,7 +88,7 @@ void initializer() {
 
     for ( i = 58; i &lt; NUM_PIECES + 58; i++ ){
         belt[i] = 1;
-    }    
+    }
 
 }
 
@@ -267,7 +265,7 @@ for ( i = 0; i &lt; NUM_SLOTS; i++ ){
 		<transition>
 			<source ref="id0"/>
 			<target ref="id8"/>
-			<label kind="synchronisation" x="-722" y="-1139">enter_preprocessing[id]?</label>
+			<label kind="synchronisation" x="-731" y="-1139">enter_preprocessing[id]?</label>
 			<label kind="assignment" x="-722" y="-1122">update_preprocessing()</label>
 		</transition>
 		<transition>
@@ -341,7 +339,7 @@ status_stations[id] = 1</label>
 	</template>
 	<template>
 		<name>Out_sensor</name>
-		<parameter> const id_outsens id</parameter>
+		<parameter>const id_outsens id</parameter>
 		<declaration>clock x;
 
 int out_sensor_pos;
@@ -610,14 +608,13 @@ set_len_queue()</label>
 		<transition>
 			<source ref="id15"/>
 			<target ref="id16"/>
-			<label kind="assignment" x="-867" y="-17">initializer(), update_belt_count()</label>
+			<label kind="assignment" x="-884" y="-34">initializer(), update_belt_count()</label>
 		</transition>
 	</template>
 	<template>
 		<name>Sensor</name>
 		<parameter>const id_sens id</parameter>
 		<declaration>clock x;
-
 int in_sensor_pos;
 
 int error_probability = 1 + id;
@@ -699,7 +696,7 @@ void update_sensor_status(bool status){
 		<transition>
 			<source ref="id18"/>
 			<target ref="id23"/>
-			<label kind="synchronisation" x="-348" y="-93">step?</label>
+			<label kind="synchronisation" x="-391" y="-93">step?</label>
 		</transition>
 		<transition>
 			<source ref="id27"/>
@@ -732,7 +729,7 @@ void update_sensor_status(bool status){
 		<transition>
 			<source ref="id20"/>
 			<target ref="id18"/>
-			<label kind="synchronisation" x="-289" y="-204">free_in_sensor[id]?</label>
+			<label kind="synchronisation" x="-297" y="-212">free_in_sensor[id]?</label>
 		</transition>
 	</template>
 	<system>out_sensor0 = Out_sensor(0);
@@ -744,12 +741,20 @@ out_sensor5 = Out_sensor(5);
 system Processing_Station, Conveyor_Belt, Sensor, out_sensor1, out_sensor2, out_sensor0, out_sensor4, out_sensor5;</system>
 	<queries>
 		<query>
-			<formula></formula>
-			<comment></comment>
+			<formula>Pr[&lt;=1000] ([] forall(i:id_s) forall(j:id_sens) Processing_Station(i).FREE &amp;&amp; Sensor(j).BUSY imply i!=j)</formula>
+			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=500]([] forall(i:id_s) Sensor(i).ERROR || forall (i: id_s) Processing_Station(i).processing_counter &gt; 1)</formula>
-			<comment>It never happens that a station holds more than 1 piece </comment>
+			<formula>Pr[&lt;=1000] ([] Processing_Station(0).WAIT_CHECK &amp;&amp; out_sensor0.WAIT_CHECK)</formula>
+			<comment>not deadlock</comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=1000] ([] Processing_Station(1).WAIT_CHECK &amp;&amp; out_sensor1.WAIT_CHECK)</formula>
+			<comment>not deadlock</comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
 		</query>
 		<query>
 			<formula>Pr[&lt;=1000] ([] (!Conveyor_Belt.INIT &amp;&amp; belt_count == NUM_PIECES) ^ (Conveyor_Belt.INIT &amp;&amp; belt_count == 0))</formula>
@@ -762,6 +767,10 @@ system Processing_Station, Conveyor_Belt, Sensor, out_sensor1, out_sensor2, out_
 		<query>
 			<formula>Pr[&lt;=1000] ([] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i])</formula>
 			<comment>no queue ever exceeds the maximum allowed length</comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
 		</query>
 		<query>
 			<formula>Pr[&lt;=1000; 200](&lt;&gt; forall (i:id_s) Sensor(i).FAKE_BUSY)</formula>
