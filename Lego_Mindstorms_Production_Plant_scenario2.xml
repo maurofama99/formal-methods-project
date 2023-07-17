@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int NUM_PIECES = 12; 
-const int NUM_SLOTS = 32;
-const int GATE_POS = -1;
-const int FIRST_POS_BELT2 = -1;
-const int LAST_POS_BELT2 = -1;
+	<declaration>const int NUM_PIECES = 20; 
+const int NUM_SLOTS = 88;
+const int GATE_POS = 11;
+const int FIRST_POS_BELT2 = 29;
+const int LAST_POS_BELT2 = 42;
 const int RULE_CONTROLLER = 10;
-const int NUM_OUT_SENSORS = 3;
 
-/** Change this to modify number of stations and input sensors **/
+/** Change this to modify number of stations and sensors **/
             const int NUM_STATIONS = 3;
             const int NUM_IN_SENSORS = 3;
+            const int NUM_OUT_SENSORS = 3;
 /****************************************************************/
 
+// time required for an entire loop: 746,92
 typedef int[0, NUM_STATIONS-1] id_s;
 typedef int[0, NUM_IN_SENSORS-1] id_sens;
-typedef int[0, NUM_IN_SENSORS-1] id_outsens;
+typedef int[0, NUM_OUT_SENSORS-1] id_outsens;
 
 bool belt[NUM_SLOTS];
 int stations[NUM_SLOTS];
@@ -28,9 +29,10 @@ bool status_in_sensors[NUM_IN_SENSORS];
 bool status_stations[NUM_STATIONS];
 bool status_preprocessing[NUM_STATIONS];
 
-broadcast chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS], check_outsensor[NUM_IN_SENSORS], busy[NUM_IN_SENSORS], free[NUM_IN_SENSORS];
+broadcast chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS], check_outsensor[NUM_OUT_SENSORS], busy[NUM_OUT_SENSORS], free[NUM_OUT_SENSORS];
 broadcast chan initialize, step;
 
+int out_sensor_position[NUM_STATIONS];
 int previous_station[NUM_STATIONS];
 int max_len_queue[NUM_STATIONS];
 int len_queue[NUM_STATIONS];
@@ -51,27 +53,55 @@ void initializer() {
 
     int i;
 
-    out_sensors[10] = 1;
-    in_sensors[12] = 1;
-    stations[14] = 1;
-    previous_station[0] = 30;
-    max_len_queue[0] = abs(12 - 30 + 1);
+    out_sensors[44] = 1;
+    out_sensors[35] = 2;
+    out_sensors[14] = 3;
+    //out_sensors[19] = 4;
+    //out_sensors[48] = 5;
 
-    out_sensors[16] = 2;
-    in_sensors[20] = 2;
-    stations[22] = 2;
-    previous_station[1] = 14;
-    max_len_queue[1] = abs(20 - 14 + 1);
+    in_sensors[80] = 1;
+    stations[83] = 1;
+    previous_station[0] = 25;
+    max_len_queue[0] = abs(63 - 25 + 1); // input sensor - previous station + 1
+
     
-    out_sensors[26] = 3;
-    in_sensors[28] = 3;
-    stations[30] = 3;
-    previous_station[2] = 22;
-    max_len_queue[2] = abs(28 - 30 + 1);   
+    //in_sensors[74] = 2;
+    //stations[78] = 2;
+    //previous_station[1] = 68;
+    //max_len_queue[1] = abs(74 - 68 + 1);
 
-    for ( i = 0; i &lt; NUM_PIECES; i++ ){
+
+    //stations[32] = 3;
+    //in_sensors[30] = 3;
+    //previous_station[2] = 78;
+    //max_len_queue[2] = abs(30 - 78 + 1);
+    
+    
+    in_sensors[37] = 2;
+    stations[39] = 2;
+    previous_station[1] = 68;
+    max_len_queue[1] = abs(37 - 68 + 1);
+
+    
+    in_sensors[22] = 3;
+    stations[25] = 3;
+    previous_station[2] = 78;
+    max_len_queue[2] = abs(22 - 78 + 1);
+
+    
+    //in_sensors[52] = 6;
+    //stations[54] = 6;
+    //previous_station[5] = 25;
+    //max_len_queue[5] = abs(52 - 25 + 1);    
+
+
+    for ( i = 44; i &lt; NUM_PIECES + 44; i++ ){
         belt[i] = 1;
-    }    
+    }
+
+    for (i = 0; i &lt; NUM_STATIONS; i++){
+        out_sensor_position[i] = -1;
+    }
 
 }
 
