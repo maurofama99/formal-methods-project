@@ -2,19 +2,18 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>const int NUM_PIECES = 12; 
-const int NUM_SLOTS = 32;
+const int NUM_SLOTS = 18;
 const int GATE_POS = -1;
 const int FIRST_POS_BELT2 = -1;
 const int LAST_POS_BELT2 = -1;
 const int RULE_CONTROLLER = 10;
-const int NUM_OUT_SENSORS = 3;
 
 /** Change this to modify number of stations and input sensors **/
             const int NUM_STATIONS = 3;
             const int NUM_IN_SENSORS = 3;
+            const int NUM_OUT_SENSORS = 3;
 /****************************************************************/
 
-// time required for an entire loop: 746,92
 typedef int[0, NUM_STATIONS-1] id_s;
 typedef int[0, NUM_IN_SENSORS-1] id_sens;
 typedef int[0, NUM_OUT_SENSORS-1] id_outsens;
@@ -53,30 +52,17 @@ void initializer() {
 
     int i;
 
-    out_sensors[10] = 1;
+    out_sensors[2] = 1;
     in_sensors[12] = 1;
     stations[14] = 1;
-    previous_station[0] = 30;
-    max_len_queue[0] = abs(12 - 30 + 1);
+    previous_station[0] = 14;
+    max_len_queue[0] = abs(12 - 14 + 1);
 
-    out_sensors[16] = 2;
-    in_sensors[20] = 2;
-    stations[22] = 2;
-    previous_station[1] = 14;
-    max_len_queue[1] = abs(20 - 14 + 1);
-    
-    out_sensors[26] = 3;
-    in_sensors[28] = 3;
-    stations[30] = 3;
-    previous_station[2] = 22;
-    max_len_queue[2] = abs(28 - 30 + 1);   
-
-
-    for ( i = 0; i &lt; NUM_PIECES; i++ ){
+    for ( i = 0; i &lt; NUM_PIECES + 2; i++ ){
         belt[i] = 1;
-    }
+    }    
 
-    for (i = 0; i &lt; NUM_STATIONS; i++){
+     for (i = 0; i &lt; NUM_STATIONS; i++){
         out_sensor_position[i] = -1;
     }
 
@@ -125,7 +111,7 @@ void free_preprocessing(){
     status_preprocessing[id] = 0;
     if (id == 0) processing_time = 10;
     if (id == 1) processing_time = 200;
-    if (id == 2) processing_time = 10;
+    if (id == 2) processing_time = 200;
 }
 
 void free_all(){
