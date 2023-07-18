@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int NUM_PIECES = 8; 
-const int NUM_SLOTS = 88;
-const int GATE_POS = 11;
-const int FIRST_POS_BELT2 = 29;
-const int LAST_POS_BELT2 = 42;
+	<declaration>const int NUM_PIECES = 6; 
+const int NUM_SLOTS = 20;
+const int GATE_POS = -1;
+const int FIRST_POS_BELT2 = -1;
+const int LAST_POS_BELT2 = -1;
 const int RULE_CONTROLLER = 10;
-const int TAU = 3000;
 
-/** Change this to modify number of stations and sensors **/
-            const int NUM_STATIONS = 6;
-            const int NUM_IN_SENSORS = 6;
-            const int NUM_OUT_SENSORS = 5;
+const int TAU = 400;
+
+/** Change this to modify number of stations and input sensors **/
+            const int NUM_STATIONS = 1;
+            const int NUM_IN_SENSORS = 1;
+            const int NUM_OUT_SENSORS = 1;
 /****************************************************************/
 
 typedef int[0, NUM_STATIONS-1] id_s;
@@ -53,53 +54,18 @@ void initializer() {
 
     int i;
 
-    out_sensors[57] = 1;
-    out_sensors[72] = 2;
-    out_sensors[35] = 3;
-    out_sensors[19] = 4;
-    out_sensors[48] = 5;
-
-    in_sensors[63] = 1;
-    stations[68] = 1;
-    previous_station[0] = 53;
-    max_len_queue[0] = abs(63 - 53 + 1); // input sensor - previous station + 1
-
-    
-    in_sensors[74] = 2;
-    stations[78] = 2;
-    previous_station[1] = 68;
-    max_len_queue[1] = abs(74 - 68 + 1);
+    out_sensors[2] = 1;
+    in_sensors[12] = 1;
+    stations[14] = 1;
+    previous_station[0] = 14;
+    max_len_queue[0] = abs(12 - 14 + 1);
 
 
-    stations[32] = 3;
-    in_sensors[30] = 3;
-    previous_station[2] = 78;
-    max_len_queue[2] = abs(30 - 78 + 1);
-    
-    
-    in_sensors[37] = 4;
-    stations[39] = 4;
-    previous_station[1] = 32;
-    max_len_queue[1] = abs(37 - 32 + 1);
-
-    
-    in_sensors[22] = 5;
-    stations[25] = 5;
-    previous_station[2] = 78;
-    max_len_queue[2] = abs(22 - 78 + 1);
-
-    
-    in_sensors[52] = 6;
-    stations[54] = 6;
-    previous_station[5] = 25;
-    max_len_queue[5] = abs(52 - 25 + 1);    
-
-
-    for ( i = 44; i &lt; NUM_PIECES + 44; i++ ){
+    for ( i = 0; i &lt; NUM_PIECES; i++ ){
         belt[i] = 1;
-    }
+    }    
 
-    for (i = 0; i &lt; NUM_STATIONS; i++){
+     for (i = 0; i &lt; NUM_STATIONS; i++){
         out_sensor_position[i] = -1;
     }
 
@@ -122,7 +88,7 @@ int next_id2;
 int processing_time;
 int pos_curr_station;
 double mean = 30.0;
-double variance = 2.0;
+double variance = 5.0;
 
 int get_len_pre_processing() {
     int i, station, sensor;
@@ -607,6 +573,8 @@ void shift() {
 
         if (i != 0) i--;
         else i = NUM_SLOTS-1;
+
+        if (GATE_POS == -1) counter_gate = 0;
     }
 }
 
@@ -770,35 +738,15 @@ void update_sensor_status(bool status){
 	<system>system Processing_Station, Conveyor_Belt, Sensor, Out_sensor;</system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] forall(i:id_s) forall(j:id_sens) Processing_Station(i).FREE &amp;&amp; Sensor(j).BUSY imply i!=j)</formula>
+			<formula>Pr[&lt;=TAU] (&lt;&gt; (forall(i:id_s) forall(j:id_sens) Processing_Station(i).FREE &amp;&amp; Sensor(j).BUSY imply i!=j) &amp;&amp; !(Processing_Station(0).WAIT_CHECK &amp;&amp; Out_sensor(0).WAIT_CHECK))</formula>
 			<comment>not deadlock</comment>
-		</query>
-		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(0).WAIT_CHECK &amp;&amp; Out_sensor(1).WAIT_CHECK)</formula>
-			<comment>not deadlock</comment>
-		</query>
-		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(1).WAIT_CHECK &amp;&amp; Out_sensor(3).WAIT_CHECK)</formula>
-			<comment>not deadlock</comment>
-		</query>
-		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(2).WAIT_CHECK &amp;&amp; Out_sensor(2).WAIT_CHECK)</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(3).WAIT_CHECK &amp;&amp; Out_sensor(4).WAIT_CHECK)</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(5).WAIT_CHECK &amp;&amp; Out_sensor(0).WAIT_CHECK)</formula>
-			<comment></comment>
 		</query>
 		<query>
 			<formula></formula>
-			<comment></comment>
+			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] (!Conveyor_Belt.INIT &amp;&amp; belt_count == NUM_PIECES) ^ (Conveyor_Belt.INIT &amp;&amp; belt_count == 0))</formula>
+			<formula>Pr[&lt;=TAU] (&lt;&gt; (!Conveyor_Belt.INIT &amp;&amp; belt_count == NUM_PIECES) ^ (Conveyor_Belt.INIT &amp;&amp; belt_count == 0))</formula>
 			<comment>It never happens that two pieces occupy the same belt slot</comment>
 		</query>
 		<query>
@@ -806,15 +754,15 @@ void update_sensor_status(bool status){
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] forall (i: id_s) Processing_Station(i).processing_counter &lt;= 1)</formula>
+			<formula>Pr[&lt;=TAU] (&lt;&gt; forall (i: id_s) Processing_Station(i).processing_counter &lt;= 1)</formula>
 			<comment>It never happens that a station holds more than 1 piece. </comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)</formula>
+			<formula>Pr[&lt;=TAU; 1000] ([] forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)</formula>
 			<comment>Input sensor malfunction</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] (&lt;&gt; forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)	</formula>
+			<formula>Pr[&lt;=TAU; 1000] (&lt;&gt; forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)	</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -822,7 +770,7 @@ void update_sensor_status(bool status){
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i])</formula>
+			<formula>Pr[&lt;=TAU] (&lt;&gt; forall (i:id_s) len_queue[i] &lt;= max_len_queue[i])</formula>
 			<comment>no queue ever exceeds the maximum allowed length</comment>
 		</query>
 		<query>
@@ -838,8 +786,16 @@ void update_sensor_status(bool status){
 			<comment></comment>
 		</query>
 		<query>
-			<formula>simulate[&lt;=1000] {belt[63]}</formula>
-			<comment>Needed to compute the termination of the loop of the first piece, which is positioned in the 63rd slot.</comment>
+			<formula>simulate[&lt;=200] {belt[2]}</formula>
+			<comment>a piece takes approximately between 100 and 200 to terminate loop</comment>
+		</query>
+		<query>
+			<formula>simulate[&lt;=TAU] {belt[11], belt[12], belt[13], Sensor(0).FREE, Sensor(0).BUSY, Sensor(0).FAKE_BUSY}</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate[&lt;=TAU] {belt[13], belt[14], belt[15], Processing_Station(0).FREE, Processing_Station(0).PREPROCESSING,Processing_Station(0).PROCESSING}</formula>
+			<comment></comment>
 		</query>
 	</queries>
 </nta>
