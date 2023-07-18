@@ -9,9 +9,9 @@ const int LAST_POS_BELT2 = -1;
 const int RULE_CONTROLLER = 10;
 
 /** Change this to modify number of stations and input sensors **/
-            const int NUM_STATIONS = 3;
-            const int NUM_IN_SENSORS = 3;
-            const int NUM_OUT_SENSORS = 3;
+            const int NUM_STATIONS = 1;
+            const int NUM_IN_SENSORS = 1;
+            const int NUM_OUT_SENSORS = 1;
 /****************************************************************/
 
 typedef int[0, NUM_STATIONS-1] id_s;
@@ -58,7 +58,7 @@ void initializer() {
     previous_station[0] = 14;
     max_len_queue[0] = abs(12 - 14 + 1);
 
-    for ( i = 0; i &lt; NUM_PIECES + 2; i++ ){
+    for ( i = 0; i &lt; NUM_PIECES; i++ ){
         belt[i] = 1;
     }    
 
@@ -512,6 +512,8 @@ void shift() {
 
         if (i != 0) i--;
         else i = NUM_SLOTS-1;
+
+        if (GATE_POS==-1) counter_gate=0;
     }
 }
 
@@ -646,6 +648,14 @@ void update_sensor_status(){
 		<query>
 			<formula>A[] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i]</formula>
 			<comment>no queue ever exceeds the maximum allowed length</comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Processing_Station(0).PROCESSING --&gt; Processing_Station(0).AFTER_PROCESSING</formula>
+			<comment>The system blocks</comment>
 		</query>
 	</queries>
 </nta>

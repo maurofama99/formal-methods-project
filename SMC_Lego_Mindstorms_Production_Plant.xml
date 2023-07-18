@@ -7,6 +7,7 @@ const int GATE_POS = 11;
 const int FIRST_POS_BELT2 = 29;
 const int LAST_POS_BELT2 = 42;
 const int RULE_CONTROLLER = 10;
+const int TAU = 3000;
 
 /** Change this to modify number of stations and sensors **/
             const int NUM_STATIONS = 6;
@@ -14,7 +15,6 @@ const int RULE_CONTROLLER = 10;
             const int NUM_OUT_SENSORS = 5;
 /****************************************************************/
 
-// time required for an entire loop: 746,92
 typedef int[0, NUM_STATIONS-1] id_s;
 typedef int[0, NUM_IN_SENSORS-1] id_sens;
 typedef int[0, NUM_OUT_SENSORS-1] id_outsens;
@@ -121,6 +121,8 @@ int next_st;
 int next_id2;
 int processing_time;
 int pos_curr_station;
+double mean = 30.0;
+double variance = 2.0;
 
 int get_len_pre_processing() {
     int i, station, sensor;
@@ -144,9 +146,9 @@ void update_preprocessing(){
 
 void free_preprocessing(){
     //status_stations[id] = 1;
-    
+      
     status_preprocessing[id] = 0;
-    processing_time = id*10;
+    processing_time = fint(random_normal(mean, sqrt(variance)));
 }
 
 void free_all(){
@@ -573,7 +575,7 @@ void shift() {
 
         if (belt[prec] &amp;&amp; !belt[next]){
 
-            if (stations[next] &gt; 0){
+            if (stations[next] &gt; 0 &amp;&amp; !status_stations[stations[next]-1] ){
                 tmp = belt[next];
                 belt[next] = belt[prec];
                 belt[prec] = tmp;
@@ -652,7 +654,7 @@ set_len_queue()</label>
 		<declaration>clock x;
 int in_sensor_pos;
 
-int error_probability = 1 + id;
+int error_probability = 1+id;
 
 void set_pos(){    
     int i;
@@ -678,82 +680,80 @@ void update_sensor_status(bool status){
 		<location id="id22" x="-263" y="280">
 			<name x="-306" y="297">FAKE_BUSY</name>
 		</location>
-		<location id="id23" x="76" y="17">
-			<name x="51" y="34">ERROR</name>
-		</location>
-		<location id="id24" x="-263" y="-93">
+		<location id="id23" x="-263" y="-93">
 			<urgent/>
 		</location>
-		<location id="id25" x="425" y="-93">
+		<location id="id24" x="425" y="-93">
 			<name x="450" y="-93">WAIT</name>
 		</location>
-		<location id="id26" x="425" y="-238">
+		<location id="id25" x="425" y="-238">
 			<urgent/>
 		</location>
-		<location id="id27" x="-535" y="280">
+		<location id="id26" x="-535" y="280">
 			<urgent/>
 		</location>
-		<branchpoint id="id28" x="-263" y="178">
+		<branchpoint id="id27" x="-263" y="178">
 		</branchpoint>
-		<branchpoint id="id29" x="76" y="-93">
+		<branchpoint id="id28" x="76" y="-93">
 		</branchpoint>
 		<init ref="id20"/>
 		<transition>
-			<source ref="id24"/>
-			<target ref="id28"/>
+			<source ref="id23"/>
+			<target ref="id27"/>
 			<label kind="guard" x="-246" y="42">belt[in_sensor_pos] == 0</label>
 		</transition>
 		<transition>
-			<source ref="id24"/>
-			<target ref="id29"/>
+			<source ref="id23"/>
+			<target ref="id28"/>
 			<label kind="guard" x="-170" y="-119">belt[in_sensor_pos] == 1</label>
 		</transition>
 		<transition>
-			<source ref="id27"/>
+			<source ref="id26"/>
 			<target ref="id19"/>
-			<label kind="assignment" x="-756" y="93">update_sensor_status(false)</label>
+			<label kind="assignment" x="-756" y="102">update_sensor_status(false)</label>
 		</transition>
 		<transition>
 			<source ref="id22"/>
-			<target ref="id27"/>
+			<target ref="id26"/>
 			<label kind="synchronisation" x="-416" y="263">step?</label>
 		</transition>
 		<transition>
-			<source ref="id26"/>
+			<source ref="id25"/>
 			<target ref="id21"/>
 			<label kind="synchronisation" x="136" y="-263">enter_preprocessing[id]!</label>
 		</transition>
 		<transition>
-			<source ref="id25"/>
-			<target ref="id26"/>
+			<source ref="id24"/>
+			<target ref="id25"/>
 			<label kind="synchronisation" x="433" y="-170">step?</label>
 		</transition>
 		<transition>
 			<source ref="id19"/>
-			<target ref="id24"/>
+			<target ref="id23"/>
 			<label kind="synchronisation" x="-391" y="-93">step?</label>
 		</transition>
 		<transition>
-			<source ref="id28"/>
+			<source ref="id27"/>
 			<target ref="id19"/>
-			<label kind="probability" x="-450" y="144">100 - error_probability</label>
+			<label kind="probability" x="-450" y="59">100 - error_probability</label>
 		</transition>
 		<transition>
-			<source ref="id28"/>
+			<source ref="id27"/>
 			<target ref="id22"/>
 			<label kind="assignment" x="-246" y="221">update_sensor_status(true)</label>
 			<label kind="probability" x="-246" y="204">error_probability</label>
 		</transition>
 		<transition>
-			<source ref="id29"/>
-			<target ref="id25"/>
+			<source ref="id28"/>
+			<target ref="id24"/>
 			<label kind="assignment" x="170" y="-85">update_sensor_status(true)</label>
 			<label kind="probability" x="161" y="-119">100 - error_probability</label>
 		</transition>
 		<transition>
-			<source ref="id29"/>
-			<target ref="id23"/>
-			<label kind="probability" x="-42" y="-51">error_probability</label>
+			<source ref="id28"/>
+			<target ref="id19"/>
+			<label kind="probability" x="0" y="-195">error_probability</label>
+			<nail x="76" y="-178"/>
 		</transition>
 		<transition>
 			<source ref="id20"/>
@@ -770,27 +770,27 @@ void update_sensor_status(bool status){
 	<system>system Processing_Station, Conveyor_Belt, Sensor, Out_sensor;</system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=1000] ([] forall(i:id_s) forall(j:id_sens) Processing_Station(i).FREE &amp;&amp; Sensor(j).BUSY imply i!=j)</formula>
+			<formula>Pr[&lt;=TAU] ([] forall(i:id_s) forall(j:id_sens) Processing_Station(i).FREE &amp;&amp; Sensor(j).BUSY imply i!=j)</formula>
 			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000] ([] Processing_Station(0).WAIT_CHECK &amp;&amp; Out_sensor(1).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] Processing_Station(0).WAIT_CHECK &amp;&amp; Out_sensor(1).WAIT_CHECK)</formula>
 			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000] ([] Processing_Station(1).WAIT_CHECK &amp;&amp; Out_sensor(3).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] Processing_Station(1).WAIT_CHECK &amp;&amp; Out_sensor(3).WAIT_CHECK)</formula>
 			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000] ([] Processing_Station(2).WAIT_CHECK &amp;&amp; Out_sensor(2).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] Processing_Station(2).WAIT_CHECK &amp;&amp; Out_sensor(2).WAIT_CHECK)</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000] ([] Processing_Station(3).WAIT_CHECK &amp;&amp; Out_sensor(4).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] Processing_Station(3).WAIT_CHECK &amp;&amp; Out_sensor(4).WAIT_CHECK)</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000] ([] Processing_Station(5).WAIT_CHECK &amp;&amp; Out_sensor(0).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] Processing_Station(5).WAIT_CHECK &amp;&amp; Out_sensor(0).WAIT_CHECK)</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -798,15 +798,31 @@ void update_sensor_status(bool status){
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000] ([] (!Conveyor_Belt.INIT &amp;&amp; belt_count == NUM_PIECES) ^ (Conveyor_Belt.INIT &amp;&amp; belt_count == 0))</formula>
+			<formula>Pr[&lt;=TAU] ([] (!Conveyor_Belt.INIT &amp;&amp; belt_count == NUM_PIECES) ^ (Conveyor_Belt.INIT &amp;&amp; belt_count == 0))</formula>
 			<comment>It never happens that two pieces occupy the same belt slot</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000] ([] forall (i: id_s) Processing_Station(i).processing_counter &lt;= 1)</formula>
-			<comment>It never happens that a station holds more than 1 piece</comment>
+			<formula></formula>
+			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000] ([] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i])</formula>
+			<formula>Pr[&lt;=TAU] ([] forall (i: id_s) Processing_Station(i).processing_counter &lt;= 1)</formula>
+			<comment>It never happens that a station holds more than 1 piece. </comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=TAU] ([] forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)</formula>
+			<comment>Input sensor malfunction</comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=TAU] (&lt;&gt; forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)	</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=TAU] ([] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i])</formula>
 			<comment>no queue ever exceeds the maximum allowed length</comment>
 		</query>
 		<query>
@@ -814,8 +830,16 @@ void update_sensor_status(bool status){
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000; 200](&lt;&gt; forall (i:id_s) Sensor(i).FAKE_BUSY)</formula>
+			<formula>Pr[&lt;=TAU; 200](&lt;&gt; forall (i:id_s) Sensor(i).FAKE_BUSY)</formula>
 			<comment></comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate[&lt;=1000] {belt[63]}</formula>
+			<comment>Needed to compute the termination of the loop of the first piece, which is positioned in the 63rd slot.</comment>
 		</query>
 	</queries>
 </nta>
