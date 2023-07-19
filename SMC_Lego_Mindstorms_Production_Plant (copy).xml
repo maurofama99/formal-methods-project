@@ -622,7 +622,7 @@ set_len_queue()</label>
 		<declaration>clock x;
 int in_sensor_pos;
 
-int error_probability = 1+id;
+int error_probability = 60;
 
 void set_pos(){    
     int i;
@@ -758,11 +758,11 @@ void update_sensor_status(bool status){
 			<comment>It never happens that a station holds more than 1 piece. </comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU; 1000] ([] forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)</formula>
+			<formula>Pr[&lt;=TAU] ([] forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)</formula>
 			<comment>Input sensor malfunction</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU; 1000] (&lt;&gt; forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)	</formula>
+			<formula>Pr[&lt;=TAU] (&lt;&gt; forall (i:id_s) (Processing_Station(i).FREE || Processing_Station(i).PREPROCESSING) and belt[Processing_Station(i).pos_curr_station]==1)	</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -794,7 +794,7 @@ void update_sensor_status(bool status){
 			<comment></comment>
 		</query>
 		<query>
-			<formula>simulate[&lt;=TAU] {belt[13], belt[14], belt[15], Processing_Station(0).FREE, Processing_Station(0).PREPROCESSING,Processing_Station(0).PROCESSING}</formula>
+			<formula>simulate[&lt;=200] {belt[13], belt[14], belt[15], Processing_Station(0).FREE, Processing_Station(0).PREPROCESSING,Processing_Station(0).PROCESSING}</formula>
 			<comment></comment>
 		</query>
 	</queries>
