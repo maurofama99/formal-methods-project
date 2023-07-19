@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int NUM_PIECES = 3; 
-const int NUM_SLOTS = 88;
-const int GATE_POS = 11;
-const int FIRST_POS_BELT2 = 29;
-const int LAST_POS_BELT2 = 42;
+	<declaration>const int NUM_PIECES = 12; 
+const int NUM_SLOTS = 32;
+const int GATE_POS = -1;
+const int FIRST_POS_BELT2 = -1;
+const int LAST_POS_BELT2 = -1;
 const int RULE_CONTROLLER = 10;
+const int NUM_OUT_SENSORS = 3;
 
-/** Change this to modify number of stations and sensors **/
-            const int NUM_STATIONS = 6;
-            const int NUM_IN_SENSORS = 6;
-            const int NUM_OUT_SENSORS = 5;
+/** Change this to modify number of stations and input sensors **/
+            const int NUM_STATIONS = 3;
+            const int NUM_IN_SENSORS = 3;
 /****************************************************************/
 
+// time required for an entire loop: 746,92
 typedef int[0, NUM_STATIONS-1] id_s;
 typedef int[0, NUM_IN_SENSORS-1] id_sens;
 typedef int[0, NUM_OUT_SENSORS-1] id_outsens;
@@ -52,49 +53,26 @@ void initializer() {
 
     int i;
 
-    out_sensors[57] = 1;
-    out_sensors[72] = 2;
-    out_sensors[35] = 3;
-    out_sensors[19] = 4;
-    out_sensors[48] = 5;
+    out_sensors[10] = 1;
+    in_sensors[12] = 1;
+    stations[14] = 1;
+    previous_station[0] = 30;
+    max_len_queue[0] = abs(12 - 30 + 1);
 
-    in_sensors[63] = 1;
-    stations[68] = 1;
-    previous_station[0] = 53;
-    max_len_queue[0] = abs(63 - 53 + 1); // input sensor - previous station + 1
-
+    out_sensors[16] = 2;
+    in_sensors[20] = 2;
+    stations[22] = 2;
+    previous_station[1] = 14;
+    max_len_queue[1] = abs(20 - 14 + 1);
     
-    in_sensors[74] = 2;
-    stations[78] = 2;
-    previous_station[1] = 68;
-    max_len_queue[1] = abs(74 - 68 + 1);
+    out_sensors[26] = 3;
+    in_sensors[28] = 3;
+    stations[30] = 3;
+    previous_station[2] = 22;
+    max_len_queue[2] = abs(28 - 30 + 1);   
 
 
-    stations[32] = 3;
-    in_sensors[30] = 3;
-    previous_station[2] = 78;
-    max_len_queue[2] = abs(30 - 78 + 1);
-    
-    
-    in_sensors[37] = 4;
-    stations[39] = 4;
-    previous_station[1] = 32;
-    max_len_queue[1] = abs(37 - 32 + 1);
-
-    
-    in_sensors[22] = 5;
-    stations[25] = 5;
-    previous_station[2] = 78;
-    max_len_queue[2] = abs(22 - 78 + 1);
-
-    
-    in_sensors[52] = 6;
-    stations[54] = 6;
-    previous_station[5] = 25;
-    max_len_queue[5] = abs(52 - 25 + 1);    
-
-
-    for ( i = 44; i &lt; NUM_PIECES + 44; i++ ){
+    for ( i = 0; i &lt; NUM_PIECES; i++ ){
         belt[i] = 1;
     }
 
@@ -135,16 +113,17 @@ int get_len_pre_processing() {
 void update_preprocessing(){
     int i;
     for (i = 0; i &lt; NUM_SLOTS; i++) {
-        if ((preprocessing[i] == (id + 1)||stations[i] == (id + 1)) &amp;&amp; belt[i] == 1)   status_preprocessing[id] = 1; 
+        if ((preprocessing[i] == (id + 1)||stations[i] == (id + 1)) &amp;&amp; belt[i] == 1)   status_preprocessing[id] = 1; // probabilmente controlli inutili
     }
 
     if (!belt[in_sens_pos]) status_in_sensors[id] = 0;
 }
 
 void free_preprocessing(){
-   
     status_preprocessing[id] = 0;
-    processing_time = id*10;
+    if (id == 0) processing_time = 10;
+    if (id == 1) processing_time = 200;
+    if (id == 2) processing_time = 10;
 }
 
 void free_all(){
@@ -173,8 +152,10 @@ void set_parameters(){
             pos_curr_station = k;
         }
     }
-    
-    for(i = pos_curr_station; i &lt; NUM_SLOTS; i++){       
+   
+    for(i = pos_curr_station; i &lt; NUM_SLOTS; i++){
+
+        
      
         if(out_sensors[i] &gt; 0){
             next_id = out_sensors[i] - 1;
@@ -665,10 +646,6 @@ void update_sensor_status(){
 		<query>
 			<formula>A[] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i]</formula>
 			<comment>no queue ever exceeds the maximum allowed length</comment>
-		</query>
-		<query>
-			<formula>A[] forall (i:id_s) Processing_Station(i).PROCESSING and Processing_Station(i).y&gt;=0 and Processing_Station(i).y&lt;=Processing_Station(i).processing_time</formula>
-			<comment></comment>
 		</query>
 	</queries>
 </nta>
