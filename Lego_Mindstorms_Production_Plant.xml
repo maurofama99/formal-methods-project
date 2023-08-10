@@ -78,14 +78,14 @@ void initializer() {
     
     in_sensors[37] = 4;
     stations[39] = 4;
-    previous_station[1] = 32;
-    max_len_queue[1] = abs(37 - 32 + 1);
+    previous_station[3] = 32;
+    max_len_queue[3] = abs(37 - 32 + 1);
 
     
     in_sensors[22] = 5;
     stations[25] = 5;
-    previous_station[2] = 78;
-    max_len_queue[2] = abs(22 - 78 + 1);
+    previous_station[4] = 78;
+    max_len_queue[4] = abs(22 - 78 + 1);
 
     
     in_sensors[52] = 6;
@@ -109,7 +109,7 @@ void initializer() {
 </declaration>
 	<template>
 		<name>Processing_Station</name>
-		<parameter>const id_s id</parameter>
+		<parameter>const id_s id, const int processing_time</parameter>
 		<declaration>clock y;
 int processing_counter = 0;
 int in_sens_pos;
@@ -118,7 +118,7 @@ int tmp_next_id;
 int next_id;
 int next_st;
 int next_id2;
-int processing_time;
+//int processing_time;
 int pos_curr_station;
 
 int get_len_pre_processing() {
@@ -144,7 +144,7 @@ void update_preprocessing(){
 void free_preprocessing(){
    
     status_preprocessing[id] = 0;
-    processing_time = id*10;
+    //processing_time = id*10;
 }
 
 void free_all(){
@@ -242,6 +242,7 @@ void set_parameters(){
 		</location>
 		<location id="id2" x="442" y="-1275">
 			<name x="459" y="-1275">WAIT</name>
+			<urgent/>
 		</location>
 		<location id="id3" x="264" y="-901">
 			<name x="230" y="-884">PROCESSING</name>
@@ -409,6 +410,7 @@ void set_pos(){
 	</template>
 	<template>
 		<name x="9" y="9">Conveyor_Belt</name>
+		<parameter>const int speed</parameter>
 		<declaration>clock x;
 bool gate;
 int counter_gate;
@@ -538,7 +540,7 @@ void shift() {
 </declaration>
 		<location id="id13" x="-26027" y="-26554">
 			<name x="-26052" y="-26528">MOVE</name>
-			<label kind="invariant" x="-26061" y="-26588">x &lt;=10</label>
+			<label kind="invariant" x="-26061" y="-26588">x &lt;= speed + 2</label>
 		</location>
 		<location id="id14" x="-26401" y="-26503">
 			<name x="-26411" y="-26537">INIT</name>
@@ -561,7 +563,7 @@ void shift() {
 		<transition>
 			<source ref="id13"/>
 			<target ref="id13"/>
-			<label kind="guard" x="-25848" y="-26486">x &gt;= 5</label>
+			<label kind="guard" x="-25848" y="-26486">x &gt;= speed</label>
 			<label kind="synchronisation" x="-25848" y="-26469">step!</label>
 			<label kind="assignment" x="-25848" y="-26452">shift(), 
 counter_gate++, x = 0,
@@ -575,7 +577,6 @@ set_len_queue()</label>
 		<name>Sensor</name>
 		<parameter>const id_sens id</parameter>
 		<declaration>int in_sensor_pos;
-clock x;
 
 void set_pos(){    
     int i;
@@ -647,14 +648,23 @@ void update_sensor_status(){
 			<label kind="synchronisation" x="-399" y="51">free_in_sensor[id]?</label>
 		</transition>
 	</template>
-	<system>system Processing_Station, Conveyor_Belt, Sensor, Out_sensor;</system>
+	<system>station1 = Processing_Station(0, 20);
+station2 = Processing_Station(1, 20);
+station3 = Processing_Station(2, 20);
+station4 = Processing_Station(3, 20);
+station5 = Processing_Station(4, 20);
+station6 = Processing_Station(5, 20);
+
+conv_belt = Conveyor_Belt(5);
+
+system station1, station2, station3, station4, station5, station6, conv_belt, Sensor, Out_sensor;</system>
 	<queries>
 		<query>
 			<formula>A[] not deadlock</formula>
 			<comment>The plant never incurs in deadlock</comment>
 		</query>
 		<query>
-			<formula>A[] !Conveyor_Belt.INIT imply belt_count == NUM_PIECES
+			<formula>A[] !conv_belt.INIT imply belt_count == NUM_PIECES
 </formula>
 			<comment>It never happens that two pieces occupy the same belt slot</comment>
 		</query>
@@ -663,11 +673,23 @@ void update_sensor_status(){
 			<comment>It never happens that a station holds more than 1 piece</comment>
 		</query>
 		<query>
+			<formula>A[] station1.processing_counter &lt;= 1</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] station1.processing_counter &lt;= 1</formula>
+			<comment></comment>
+		</query>
+		<query>
 			<formula>A[] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i]</formula>
 			<comment>no queue ever exceeds the maximum allowed length</comment>
 		</query>
 		<query>
-			<formula>A[] forall (i:id_s) Processing_Station(i).PROCESSING and Processing_Station(i).y&gt;=0 and Processing_Station(i).y&lt;=Processing_Station(i).processing_time</formula>
+			<formula>A[] forall (i:id_s) Processing_Station(i).PROCESSING imply (Processing_Station(i).y&gt;=0 and Processing_Station(i).y&lt;=Processing_Station(i).processing_time)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] station1.PROCESSING imply (station1.y&gt;=0 and station1.y&lt;=station1.processing_time)</formula>
 			<comment></comment>
 		</query>
 	</queries>

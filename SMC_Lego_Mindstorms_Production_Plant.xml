@@ -110,7 +110,7 @@ void initializer() {
 </declaration>
 	<template>
 		<name>Processing_Station</name>
-		<parameter>const id_s id</parameter>
+		<parameter>const id_s id, const double mean, const double variance</parameter>
 		<declaration>clock x;
 int processing_counter = 0;
 int in_sens_pos;
@@ -121,8 +121,6 @@ int next_st;
 int next_id2;
 int processing_time;
 int pos_curr_station;
-double mean = 30.0;
-double variance = 2.0;
 
 int get_len_pre_processing() {
     int i, station, sensor;
@@ -247,7 +245,7 @@ void set_parameters(){
 		</location>
 		<location id="id2" x="-60" y="-1020">
 			<name x="-43" y="-1020">WAIT</name>
-			<label kind="exponentialrate" x="-69" y="-1003">1</label>
+			<urgent/>
 		</location>
 		<location id="id3" x="-238" y="-646">
 			<name x="-272" y="-629">PROCESSING</name>
@@ -365,12 +363,10 @@ status_stations[id] = 1</label>
 	</template>
 	<template>
 		<name>Out_sensor</name>
-		<parameter>const id_outsens id</parameter>
+		<parameter>const id_outsens id, const int error_probability</parameter>
 		<declaration>clock x;
 
 int out_sensor_pos;
-
-int error_probability = 1 + id;
 bool malfunction = false;
 
 void set_pos(){    
@@ -461,6 +457,7 @@ void set_pos(){
 	</template>
 	<template>
 		<name x="9" y="9">Conveyor_Belt</name>
+		<parameter>const int speed</parameter>
 		<declaration>clock x;
 bool gate;
 int counter_gate;
@@ -608,13 +605,13 @@ void shift() {
 		</location>
 		<location id="id18" x="-561" y="-612">
 			<name x="-571" y="-646">MOVE</name>
-			<label kind="invariant" x="-586" y="-587">x  &lt;= 10</label>
+			<label kind="invariant" x="-595" y="-586">x  &lt;= speed + 2</label>
 		</location>
 		<init ref="id16"/>
 		<transition>
 			<source ref="id18"/>
 			<target ref="id18"/>
-			<label kind="guard" x="-382" y="-663">x &gt;= 5</label>
+			<label kind="guard" x="-382" y="-663">x &gt;= speed</label>
 			<label kind="synchronisation" x="-382" y="-646">step!</label>
 			<label kind="assignment" x="-382" y="-629">shift(), 
 counter_gate++, x = 0,
@@ -636,11 +633,9 @@ set_len_queue()</label>
 	</template>
 	<template>
 		<name>Sensor</name>
-		<parameter>const id_sens id</parameter>
+		<parameter>const id_sens id, const int error_probability</parameter>
 		<declaration>clock x;
 int in_sensor_pos;
-
-int error_probability = 1+id;
 
 void set_pos(){    
     int i;
@@ -753,30 +748,54 @@ void update_sensor_status(bool status){
 			<label kind="synchronisation" x="-297" y="-212">free_in_sensor[id]?</label>
 		</transition>
 	</template>
-	<system>system Processing_Station, Conveyor_Belt, Sensor, Out_sensor;</system>
+	<system>station1 = Processing_Station(0, 30.0, 2.0);
+station2 = Processing_Station(1, 40.0, 3.0);
+station3 = Processing_Station(2, 20.0, 2.0);
+station4 = Processing_Station(3, 30.0, 2.0);
+station5 = Processing_Station(4, 30.0, 2.0);
+station6 = Processing_Station(5, 30.0, 2.0);
+
+sensor1 = Sensor(0, 1);
+sensor2 = Sensor(1, 2);
+sensor3 = Sensor(2, 3);
+sensor4 = Sensor(3, 1);
+sensor5 = Sensor(4, 3);
+sensor6 = Sensor(5, 1);
+
+out_sensor1 = Out_sensor(0, 1);
+out_sensor2 = Out_sensor(1, 3);
+out_sensor3 = Out_sensor(2, 1);
+out_sensor4 = Out_sensor(3, 2);
+out_sensor5 = Out_sensor(4, 1);
+
+conv_belt = Conveyor_Belt(5);
+
+system station1, station2, station3, station4, station5, station6, conv_belt, sensor1, sensor2, sensor3, sensor4, sensor5, sensor6, 
+            out_sensor1, out_sensor2, out_sensor3, out_sensor4, out_sensor5;
+</system>
 	<queries>
 		<query>
 			<formula>Pr[&lt;=TAU] ([] forall(i:id_s) forall(j:id_sens) Processing_Station(i).FREE &amp;&amp; Sensor(j).BUSY imply i!=j)</formula>
 			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(0).WAIT_CHECK &amp;&amp; Out_sensor(1).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] station1.WAIT_CHECK &amp;&amp; out_sensor2.WAIT_CHECK)</formula>
 			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(1).WAIT_CHECK &amp;&amp; Out_sensor(3).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] station2.WAIT_CHECK &amp;&amp; out_sensor4.WAIT_CHECK)</formula>
 			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(2).WAIT_CHECK &amp;&amp; Out_sensor(2).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] station3.WAIT_CHECK &amp;&amp; out_sensor3.WAIT_CHECK)</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(3).WAIT_CHECK &amp;&amp; Out_sensor(4).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] station4.WAIT_CHECK &amp;&amp; out_sensor5.WAIT_CHECK)</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] Processing_Station(5).WAIT_CHECK &amp;&amp; Out_sensor(0).WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] station6.WAIT_CHECK &amp;&amp; out_sensor1.WAIT_CHECK)</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -784,7 +803,7 @@ void update_sensor_status(bool status){
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] (!Conveyor_Belt.INIT &amp;&amp; belt_count == NUM_PIECES) ^ (Conveyor_Belt.INIT &amp;&amp; belt_count == 0))</formula>
+			<formula>Pr[&lt;=TAU] ([] (!conv_belt.INIT &amp;&amp; belt_count == NUM_PIECES) ^ (conv_belt.INIT &amp;&amp; belt_count == 0))</formula>
 			<comment>It never happens that two pieces occupy the same belt slot</comment>
 		</query>
 		<query>
