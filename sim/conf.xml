@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int NUM_PIECES = 3; 
-const int NUM_SLOTS = 88;
-const int GATE_POS = 11;
-const int FIRST_POS_BELT2 = 29;
-const int LAST_POS_BELT2 = 42;
+	<declaration>const int NUM_PIECES = {NUM_PIECES};
+const int PROCESSING_TIME_S1 = {PROCESSING_TIME_S1};
+const int PROCESSING_TIME_S2 = {PROCESSING_TIME_S2};
+const int PROCESSING_TIME_S3 = {PROCESSING_TIME_S3};
+const int SPEED = {SPEED};
+ 
+const int NUM_SLOTS = 32;
+const int GATE_POS = -1;
+const int FIRST_POS_BELT2 = -1;
+const int LAST_POS_BELT2 = -1;
 const int RULE_CONTROLLER = 10;
 
 /** Change this to modify number of stations and sensors **/
-            const int NUM_STATIONS = 6;
-            const int NUM_IN_SENSORS = 6;
-            const int NUM_OUT_SENSORS = 5;
+            const int NUM_STATIONS = 3;
+            const int NUM_IN_SENSORS = 3;
+            const int NUM_OUT_SENSORS = 3;
 /****************************************************************/
-
-const int PROCESSING_TIME_S1 = 10;
-const int PROCESSING_TIME_S2 = 20;
-const int PROCESSING_TIME_S3 = 10;
-const int PROCESSING_TIME_S4 = 5;
-const int PROCESSING_TIME_S5 = 10;
-const int PROCESSING_TIME_S6 = 10;
-
-const int SPEED = 5;
 
 typedef int[0, NUM_STATIONS-1] id_s;
 typedef int[0, NUM_IN_SENSORS-1] id_sens;
@@ -61,49 +57,26 @@ void initializer() {
 
     int i;
 
-    out_sensors[57] = 1;
-    out_sensors[72] = 2;
-    out_sensors[35] = 3;
-    out_sensors[19] = 4;
-    out_sensors[48] = 5;
+    out_sensors[10] = 1;
+    in_sensors[12] = 1;
+    stations[14] = 1;
+    previous_station[0] = 30;
+    max_len_queue[0] = abs(12 - 30 + 1);
 
-    in_sensors[63] = 1;
-    stations[68] = 1;
-    previous_station[0] = 53;
-    max_len_queue[0] = abs(63 - 53 + 1); // input sensor - previous station + 1
-
+    out_sensors[16] = 2;
+    in_sensors[20] = 2;
+    stations[22] = 2;
+    previous_station[1] = 14;
+    max_len_queue[1] = abs(20 - 14 + 1);
     
-    in_sensors[74] = 2;
-    stations[78] = 2;
-    previous_station[1] = 68;
-    max_len_queue[1] = abs(74 - 68 + 1);
+    out_sensors[26] = 3;
+    in_sensors[28] = 3;
+    stations[30] = 3;
+    previous_station[2] = 22;
+    max_len_queue[2] = abs(28 - 30 + 1); 
 
 
-    stations[32] = 3;
-    in_sensors[30] = 3;
-    previous_station[2] = 78;
-    max_len_queue[2] = abs(30 - 78 + 1);
-    
-    
-    in_sensors[37] = 4;
-    stations[39] = 4;
-    previous_station[3] = 32;
-    max_len_queue[3] = abs(37 - 32 + 1);
-
-    
-    in_sensors[22] = 5;
-    stations[25] = 5;
-    previous_station[4] = 78;
-    max_len_queue[4] = abs(22 - 78 + 1);
-
-    
-    in_sensors[52] = 6;
-    stations[54] = 6;
-    previous_station[5] = 25;
-    max_len_queue[5] = abs(52 - 25 + 1);    
-
-
-    for ( i = 44; i &lt; NUM_PIECES + 44; i++ ){
+    for ( i = 0; i &lt; NUM_PIECES; i++ ){
         belt[i] = 1;
     }
 
@@ -660,13 +633,10 @@ void update_sensor_status(){
 	<system>station1 = Processing_Station(0, PROCESSING_TIME_S1);
 station2 = Processing_Station(1, PROCESSING_TIME_S2);
 station3 = Processing_Station(2, PROCESSING_TIME_S3);
-station4 = Processing_Station(3, PROCESSING_TIME_S4);
-station5 = Processing_Station(4, PROCESSING_TIME_S5);
-station6 = Processing_Station(5, PROCESSING_TIME_S6);
 
 conv_belt = Conveyor_Belt(SPEED);
 
-system station1, station2, station3, station4, station5, station6, conv_belt, Sensor, Out_sensor;</system>
+system station1, station2, station3, conv_belt, Sensor, Out_sensor;</system>
 	<queries>
 		<query>
 			<formula>A[] not deadlock</formula>
