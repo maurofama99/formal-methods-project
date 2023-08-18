@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int NUM_PIECES = {NUM_PIECES};
-const int PROCESSING_TIME_S1 = {PROCESSING_TIME_S1};
-const int PROCESSING_TIME_S2 = {PROCESSING_TIME_S2};
-const int PROCESSING_TIME_S3 = {PROCESSING_TIME_S3};
-const int SPEED = {SPEED};
+	<declaration>const int NUM_PIECES;
+const int PROCESSING_TIME_S1;
+const int PROCESSING_TIME_S2;
+const int PROCESSING_TIME_S3;
+const int SPEED;
  
-const int NUM_SLOTS = 32;
-const int GATE_POS = -1;
-const int FIRST_POS_BELT2 = -1;
-const int LAST_POS_BELT2 = -1;
-const int RULE_CONTROLLER = 10;
+const int NUM_SLOTS;
+const int GATE_POS;
+const int FIRST_POS_BELT2;
+const int LAST_POS_BELT2;
+const int RULE_CONTROLLER;
 
 /** Change this to modify number of stations and sensors **/
-            const int NUM_STATIONS = 3;
-            const int NUM_IN_SENSORS = 3;
-            const int NUM_OUT_SENSORS = 3;
+            const int NUM_STATIONS;
+            const int NUM_IN_SENSORS;
+            const int NUM_OUT_SENSORS;
 /****************************************************************/
 
 typedef int[0, NUM_STATIONS-1] id_s;
@@ -57,23 +57,23 @@ void initializer() {
 
     int i;
 
-    out_sensors[10] = 1;
+    out_sensors[0] = 1;
     in_sensors[12] = 1;
     stations[14] = 1;
     previous_station[0] = 30;
-    max_len_queue[0] = abs(12 - 30 + 1);
+    max_len_queue[0] = abs(12 - 0) + 1;
 
     out_sensors[16] = 2;
     in_sensors[20] = 2;
     stations[22] = 2;
     previous_station[1] = 14;
-    max_len_queue[1] = abs(20 - 14 + 1);
+    max_len_queue[1] = abs(20 - 14) + 1;
     
     out_sensors[26] = 3;
     in_sensors[28] = 3;
     stations[30] = 3;
     previous_station[2] = 22;
-    max_len_queue[2] = abs(28 - 30 + 1); 
+    max_len_queue[2] = abs(28 - 30)+ 1; 
 
 
     for ( i = 0; i &lt; NUM_PIECES; i++ ){
@@ -462,6 +462,10 @@ void shift() {
         if (i == NUM_SLOTS-1) next = 0;
         else next = i+1;
 
+		if (GATE_POS == -1){
+			counter_gate = 0;
+		}
+
         if(i == GATE_POS){
             if(counter_gate%RULE_CONTROLLER){
                 gate = true;
@@ -664,18 +668,6 @@ system station1, station2, station3, conv_belt, Sensor, Out_sensor;</system>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>A[] station4.processing_counter &lt;= 1</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>A[] station5.processing_counter &lt;= 1</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>A[] station6.processing_counter &lt;= 1</formula>
-			<comment></comment>
-		</query>
-		<query>
 			<formula></formula>
 			<comment></comment>
 		</query>
@@ -697,18 +689,6 @@ system station1, station2, station3, conv_belt, Sensor, Out_sensor;</system>
 		</query>
 		<query>
 			<formula>A[] station3.PROCESSING imply (station3.y&gt;=0 and station3.y&lt;=station3.processing_time)</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>A[] station4.PROCESSING imply (station4.y&gt;=0 and station4.y&lt;=station4.processing_time)</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>A[] station5.PROCESSING imply (station5.y&gt;=0 and station5.y&lt;=station5.processing_time)</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>A[] station6.PROCESSING imply (station6.y&gt;=0 and station6.y&lt;=station6.processing_time)</formula>
 			<comment></comment>
 		</query>
 	</queries>

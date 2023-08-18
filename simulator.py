@@ -1,3 +1,4 @@
+
 import os
 from xml.etree import ElementTree as ET
 
@@ -21,7 +22,7 @@ def change_xml_params(file_path, param1_value, param2_value, param3_value):
 
 # Funzione per eseguire il comando verifyta
 def launch_verifyta():
-    command = './home/maurofama/Documents/Uni/4th_sem/Formal Methods/uppaal64-4.1.26-2/bin-Linux/verifyta s -o2 /home/maurofama/Documents/Uni/4th_sem/Formal Methods/project/formal-methods-project/SMC_Lego_Mindstorms_Production_Plant_deadlock_verification.xml'  # Comando verifyta
+    command = './Applications/uppaal64-4.1.26/bin-Darwin/verifyta s -o2 ./Users/valeria/Desktop/formal-methods-project/SMC_Lego_Mindstorms_Production_Plant_deadlock_verification.xml'  # Comando verifyta
     os.system(command)
 
 def main():
