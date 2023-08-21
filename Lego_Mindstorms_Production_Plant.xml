@@ -187,7 +187,6 @@ void set_parameters(){
      
         if(out_sensors[i] &gt; 0){
             next_id = out_sensors[i] - 1;
-            out_sensor_position[id] = i;
             i = NUM_SLOTS;
         }else if(in_sensors[i] &gt; 0){
             i = NUM_SLOTS;
@@ -448,27 +447,23 @@ int get_in_sens_position(int id){
 
 void set_len_queue(){
     int i, j;
-    int out_sens_pos;
+    int count = 0;
     int in_sens_pos;
-    int count;
     
     for (j = 0; j &lt; NUM_STATIONS; j++){
-        out_sens_pos = out_sensor_position[j];
         in_sens_pos = get_in_sens_position(j);
         count = 0;
-
-        if (out_sens_pos != -1){ // out_sensor present
-            for (i = out_sens_pos; i &lt;= in_sens_pos; i++){
-                if (belt[i]) count ++;
-            }
-        } else { // out_sensor not present, counting from previous station
-            for (i = previous_station[j]; i &lt;= in_sens_pos; i++){
-                if (belt[i]) count ++;
+        
+        for(i = in_sens_pos; i &lt; NUM_SLOTS; i--){
+            if(i == 0) i = NUM_SLOTS - 1;
+            if(belt[i]) count = count + 1;
+            if((out_sensors[i] != 0) || (stations[i] != 0)){
+                i = NUM_SLOTS;
             }
         }
+        
         len_queue[j] = count;
     }  
-
 }
 
 void shift() {
