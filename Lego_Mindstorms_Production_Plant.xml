@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int NUM_PIECES = 3; 
+	<declaration>const int NUM_PIECES = 8; 
 const int NUM_SLOTS = 88;
 const int GATE_POS = 11;
 const int FIRST_POS_BELT2 = 29;
@@ -70,37 +70,37 @@ void initializer() {
     in_sensors[63] = 1;
     stations[68] = 1;
     previous_station[0] = 53;
-    max_len_queue[0] = abs(63 - 53 + 1); // input sensor - previous station + 1
+    //max_len_queue[0] = abs(63 - 53 + 1); // input sensor - previous station + 1
 
     
     in_sensors[74] = 2;
     stations[78] = 2;
     previous_station[1] = 68;
-    max_len_queue[1] = abs(74 - 68 + 1);
+    //max_len_queue[1] = abs(74 - 68 + 1);
 
 
     stations[32] = 3;
     in_sensors[30] = 3;
     previous_station[2] = 78;
-    max_len_queue[2] = abs(30 - 78 + 1);
+    //max_len_queue[2] = abs(30 - 78 + 1);
     
     
     in_sensors[37] = 4;
     stations[39] = 4;
     previous_station[3] = 32;
-    max_len_queue[3] = abs(37 - 32 + 1);
+    //max_len_queue[3] = abs(37 - 32 + 1);
 
     
     in_sensors[22] = 5;
     stations[25] = 5;
     previous_station[4] = 78;
-    max_len_queue[4] = abs(22 - 78 + 1);
+    //max_len_queue[4] = abs(22 - 78 + 1);
 
     
     in_sensors[52] = 6;
     stations[54] = 6;
     previous_station[5] = 25;
-    max_len_queue[5] = abs(52 - 25 + 1);    
+    //max_len_queue[5] = abs(52 - 25 + 1);    
 
 
     for ( i = 44; i &lt; NUM_PIECES + 44; i++ ){
@@ -122,7 +122,6 @@ void initializer() {
 		<declaration>clock y;
 int processing_counter = 0;
 int in_sens_pos;
-int out_sens_pos;
 int tmp_next_id;
 int next_id;
 int next_st;
@@ -165,11 +164,25 @@ void free_station(){
     status_stations[id] = 0;
 }
 
+void set_max_len_queue(){
+    int i;
+    i = in_sens_pos;
+    while(out_sensors[i]==0 &amp;&amp; stations[i]==0){
+        max_len_queue[id]++;
+
+        if(i == FIRST_POS_BELT2) i = GATE_POS + 1;
+        if(i == FIRST_POS_BELT2 - 1) i = LAST_POS_BELT2 + 1;
+        if(i != 0) i--;
+        else i = NUM_SLOTS-1;
+    }  
+
+    if(out_sensors[i]) max_len_queue[id]++; 
+}
+
 void set_parameters(){ 
     int i, j, k;
     next_id = -1;
     next_id2 = -1;
-
 
     for(j = 0; j &lt; NUM_SLOTS; j++){
         if(in_sensors[j] == id + 1){
@@ -213,29 +226,8 @@ void set_parameters(){
 
         if(i == NUM_SLOTS - 1) i = 0;
         
-    } 
-    
-
-    if (next_id != -1){
-    for(i = 0; i &lt; NUM_SLOTS; i++){
-            if(out_sensors[i] == next_id + 1){
-                max_len_queue[id] = 0;
-                k = i; 
-                while(in_sensors[k] != next_id + 1){
-                    max_len_queue[id]++;
-                    if (i &lt; FIRST_POS_BELT2 &amp;&amp; i &gt; LAST_POS_BELT2 &amp;&amp; k == FIRST_POS_BELT2 - 1){ // out sensor not in secondary belt
-                        k = LAST_POS_BELT2 + 1;
-                    } else if (i &gt; FIRST_POS_BELT2 &amp;&amp; i &lt; LAST_POS_BELT2) { // out sensor in secondary belt
-                        if (k == GATE_POS) k = FIRST_POS_BELT2;
-                        else if (k == LAST_POS_BELT2) k = FIRST_POS_BELT2 - 1;
-                        else k++;
-                    } else if (k == NUM_SLOTS-1) k = 0;
-                    else k++;
-                }
-                max_len_queue[id]++;
-            }
     }
-    }
+    set_max_len_queue();
 }
 
 
@@ -453,15 +445,17 @@ void set_len_queue(){
     for (j = 0; j &lt; NUM_STATIONS; j++){
         in_sens_pos = get_in_sens_position(j);
         count = 0;
-        
-        for(i = in_sens_pos; i &lt; NUM_SLOTS; i--){
-            if(i == 0) i = NUM_SLOTS - 1;
-            if(belt[i]) count = count + 1;
-            if((out_sensors[i] != 0) || (stations[i] != 0)){
-                i = NUM_SLOTS;
-            }
-        }
-        
+        i = in_sens_pos;
+        while(out_sensors[i]==0 &amp;&amp; stations[i]==0){
+            if(belt[i]) count++;
+
+            if(i == FIRST_POS_BELT2) i = GATE_POS + 1;
+            if(i == FIRST_POS_BELT2 - 1) i = LAST_POS_BELT2 + 1;
+            if(i != 0) i--;
+            else i = NUM_SLOTS-1;
+        }  
+        if(belt[i]) count++;
+
         len_queue[j] = count;
     }  
 }
