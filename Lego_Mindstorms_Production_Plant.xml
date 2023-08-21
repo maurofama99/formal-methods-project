@@ -40,7 +40,6 @@ bool status_preprocessing[NUM_STATIONS];
 broadcast chan enter_preprocessing[NUM_STATIONS], free_in_sensor[NUM_IN_SENSORS], check_outsensor[NUM_OUT_SENSORS], busy[NUM_OUT_SENSORS], free[NUM_OUT_SENSORS];
 broadcast chan initialize, step;
 
-int out_sensor_position[NUM_STATIONS];
 int previous_station[NUM_STATIONS];
 int max_len_queue[NUM_STATIONS];
 int len_queue[NUM_STATIONS];
@@ -105,10 +104,6 @@ void initializer() {
 
     for ( i = 44; i &lt; NUM_PIECES + 44; i++ ){
         belt[i] = 1;
-    }
-
-    for (i = 0; i &lt; NUM_STATIONS; i++){
-        out_sensor_position[i] = -1;
     }
 
 }
