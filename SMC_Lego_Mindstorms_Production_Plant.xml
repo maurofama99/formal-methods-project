@@ -421,7 +421,7 @@ void set_len_queue(){
         in_sens_pos = get_in_sens_position(j);
         count = 0;
         i = in_sens_pos;
-        while(out_sensors[i]==0 &amp;&amp; stations[i]==0){
+        while(stations[i]==0){
             if(belt[i]) count++;
 
             if(i == FIRST_POS_BELT2) i = GATE_POS + 1;
@@ -429,7 +429,6 @@ void set_len_queue(){
             if(i != 0) i--;
             else i = NUM_SLOTS-1;
         }  
-        if(belt[i]) count++;
 
         len_queue[j] = count;
     }  
