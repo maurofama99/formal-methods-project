@@ -8,6 +8,7 @@ const int FIRST_POS_BELT2 = 29;
 const int LAST_POS_BELT2 = 42;
 const int RULE_CONTROLLER = 10;
 const int TAU = 10000;
+const bool is_moving = false;
 
 /** Change this to modify number of stations and sensors **/
             const int NUM_STATIONS = 6;
@@ -134,6 +135,7 @@ void initializer() {
     }
 
 }
+
 
 
 
@@ -805,27 +807,31 @@ system station1, station2, station3, station4, station5, station6, conv_belt, se
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] (station1.FREE and !sensor1.BUSY) || (!station1.FREE and sensor1.BUSY))</formula>
+			<formula>Pr[&lt;=TAU] ([] (((station1.FREE || station1.AFTER_PROCESSING) imply !sensor1.BUSY) &amp;&amp; (sensor1.BUSY imply !(station1.FREE || station1.AFTER_PROCESSING))) &amp;&amp; (((station2.FREE || station2.AFTER_PROCESSING) imply !sensor2.BUSY) &amp;&amp; (sensor2.BUSY imply !(station2.FREE || station2.AFTER_PROCESSING))) &amp;&amp; (((station3.FREE || station3.AFTER_PROCESSING) imply !sensor3.BUSY) &amp;&amp; (sensor3.BUSY imply !(station3.FREE || station3.AFTER_PROCESSING))) &amp;&amp; (((station4.FREE || station4.AFTER_PROCESSING) imply !sensor4.BUSY) &amp;&amp; (sensor4.BUSY imply !(station4.FREE || station4.AFTER_PROCESSING))) &amp;&amp; (((station5.FREE || station5.AFTER_PROCESSING) imply !sensor5.BUSY) &amp;&amp; (sensor5.BUSY imply !(station5.FREE || station5.AFTER_PROCESSING))) &amp;&amp; (((station6.FREE || station6.AFTER_PROCESSING) imply !sensor6.BUSY) &amp;&amp; (sensor6.BUSY imply !(station6.FREE || station6.AFTER_PROCESSING))) &amp;&amp; (!(station1.WAIT_CHECK &amp;&amp; out_sensor2.WAIT_CHECK)) &amp;&amp; (!(station2.WAIT_CHECK &amp;&amp; out_sensor4.WAIT_CHECK)) &amp;&amp; () )</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=TAU] ([] ((station1.FREE || station1.AFTER_PROCESSING) imply !sensor1.BUSY) &amp;&amp; (sensor1.BUSY imply !(station1.FREE || station1.AFTER_PROCESSING)))</formula>
 			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] (station2.FREE and !sensor2.BUSY) || (!station2.FREE and sensor2.BUSY))</formula>
+			<formula>Pr[&lt;=TAU] ([] ((station2.FREE || station2.AFTER_PROCESSING) imply !sensor2.BUSY) &amp;&amp; (sensor2.BUSY imply !(station2.FREE || station2.AFTER_PROCESSING)))</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] (station3.FREE and !sensor3.BUSY) || (!station3.FREE and sensor3.BUSY))</formula>
+			<formula>Pr[&lt;=TAU] ([] ((station3.FREE || station3.AFTER_PROCESSING) imply !sensor3.BUSY) &amp;&amp; (sensor3.BUSY imply !(station3.FREE || station3.AFTER_PROCESSING)))</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] (station4.FREE and !sensor4.BUSY) || (!station4.FREE and sensor4.BUSY))</formula>
+			<formula>Pr[&lt;=TAU] ([] ((station4.FREE || station4.AFTER_PROCESSING) imply !sensor4.BUSY) &amp;&amp; (sensor4.BUSY imply !(station4.FREE || station4.AFTER_PROCESSING)))</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] (station5.FREE and !sensor5.BUSY) || (!station5.FREE and sensor5.BUSY))</formula>
+			<formula>Pr[&lt;=TAU] ([] ((station5.FREE || station5.AFTER_PROCESSING) imply !sensor5.BUSY) &amp;&amp; (sensor5.BUSY imply !(station5.FREE || station5.AFTER_PROCESSING)))</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] (station6.FREE and !sensor6.BUSY) || (!station6.FREE and sensor6.BUSY))</formula>
+			<formula>Pr[&lt;=TAU] ([] ((station6.FREE || station6.AFTER_PROCESSING) imply !sensor6.BUSY) &amp;&amp; (sensor6.BUSY imply !(station6.FREE || station6.AFTER_PROCESSING)))</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -833,23 +839,23 @@ system station1, station2, station3, station4, station5, station6, conv_belt, se
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] station1.WAIT_CHECK &amp;&amp; out_sensor2.WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] !(station1.WAIT_CHECK &amp;&amp; out_sensor2.WAIT_CHECK))</formula>
 			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] station2.WAIT_CHECK &amp;&amp; out_sensor4.WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] !(station2.WAIT_CHECK &amp;&amp; out_sensor4.WAIT_CHECK))</formula>
 			<comment>not deadlock</comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] station3.WAIT_CHECK &amp;&amp; out_sensor3.WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] !(station3.WAIT_CHECK &amp;&amp; out_sensor3.WAIT_CHECK))</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] station4.WAIT_CHECK &amp;&amp; out_sensor5.WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] !(station4.WAIT_CHECK &amp;&amp; out_sensor5.WAIT_CHECK))</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] station6.WAIT_CHECK &amp;&amp; out_sensor1.WAIT_CHECK)</formula>
+			<formula>Pr[&lt;=TAU] ([] !(station6.WAIT_CHECK &amp;&amp; out_sensor1.WAIT_CHECK))</formula>
 			<comment></comment>
 		</query>
 		<query>

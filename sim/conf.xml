@@ -71,19 +71,19 @@ void initializer() {
     in_sensors[12] = 1;
     stations[14] = 1;
     previous_station[0] = 30;
-    max_len_queue[0] = abs(12 - 30 + 1);
+    max_len_queue[0] = abs(12 - 30) + 1;
 
     out_sensors[16] = 2;
     in_sensors[20] = 2;
     stations[22] = 2;
     previous_station[1] = 14;
-    max_len_queue[1] = abs(20 - 14 + 1);
+    max_len_queue[1] = abs(20 - 14) + 1;
     
     out_sensors[26] = 3;
     in_sensors[28] = 3;
     stations[30] = 3;
     previous_station[2] = 22;
-    max_len_queue[2] = abs(28 - 30 + 1);   
+    max_len_queue[2] = abs(28 - 30) + 1;   
 
 
     for ( i = 0; i &lt; NUM_PIECES; i++ ){
