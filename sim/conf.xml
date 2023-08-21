@@ -760,7 +760,7 @@ out_sensor1, out_sensor2, out_sensor3;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] (station1.FREE and !sensor1.BUSY) || (!station1.FREE and sensor1.BUSY) &amp;&amp; (station2.FREE and !sensor2.BUSY) || (!station2.FREE and sensor2.BUSY) &amp;&amp; (station3.FREE and !sensor3.BUSY) || (!station3.FREE and sensor3.BUSY) &amp;&amp; (station1.WAIT_CHECK &amp;&amp; out_sensor1.WAIT_CHECK) &amp;&amp; (station2.WAIT_CHECK &amp;&amp; out_sensor2.WAIT_CHECK) &amp;&amp; (station3.WAIT_CHECK &amp;&amp; out_sensor3.WAIT_CHECK))</formula>
+			<formula>Pr[&lt;=TAU] ([] (((station1.FREE || station1.AFTER_PROCESSING) imply !sensor1.BUSY) &amp;&amp; (sensor1.BUSY imply !(station1.FREE || station1.AFTER_PROCESSING))) &amp;&amp; (((station2.FREE || station2.AFTER_PROCESSING) imply !sensor2.BUSY) &amp;&amp; (sensor2.BUSY imply !(station2.FREE || station2.AFTER_PROCESSING))) &amp;&amp; (((station3.FREE || station3.AFTER_PROCESSING) imply !sensor3.BUSY) &amp;&amp; (sensor3.BUSY imply !(station3.FREE || station3.AFTER_PROCESSING))) &amp;&amp; (!(station1.WAIT_CHECK &amp;&amp; out_sensor2.WAIT_CHECK)) &amp;&amp; (!(station2.WAIT_CHECK &amp;&amp; out_sensor3.WAIT_CHECK)) &amp;&amp; (!(station3.WAIT_CHECK &amp;&amp; out_sensor1.WAIT_CHECK)))</formula>
 			<comment></comment>
 		</query>
 	</queries>
