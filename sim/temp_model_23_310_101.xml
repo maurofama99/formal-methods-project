@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int NUM_PIECES;
-const int PROCESSING_MEAN_S1;
-const int PROCESSING_VAR_S1;
-const int PROCESSING_MEAN_S2;
-const int PROCESSING_VAR_S2;
-const int PROCESSING_MEAN_S3;
-const int PROCESSING_VAR_S3;
-const int ERROR_PROB_S1;
-const int ERROR_PROB_S2;
-const int ERROR_PROB_S3;
-const int ERROR_PROB_OUTS1;
-const int ERROR_PROB_OUTS2;
-const int ERROR_PROB_OUTS3;
-const int SPEED;
+	<declaration>const int NUM_PIECES = 23;
+const int PROCESSING_MEAN_S1 = 10;
+const int PROCESSING_VAR_S1 = 2;
+const int PROCESSING_MEAN_S2 = 310;
+const int PROCESSING_VAR_S2 = 5;
+const int PROCESSING_MEAN_S3 = 10;
+const int PROCESSING_VAR_S3 = 2;
+const int ERROR_PROB_S1 = 1;
+const int ERROR_PROB_S2 = 1;
+const int ERROR_PROB_S3 = 1;
+const int ERROR_PROB_OUTS1 = 1;
+const int ERROR_PROB_OUTS2 = 101;
+const int ERROR_PROB_OUTS3 = 1;
+const int SPEED = 5;
  
-const int NUM_SLOTS;
-const int GATE_POS;
-const int FIRST_POS_BELT2;
-const int LAST_POS_BELT2;
-const int RULE_CONTROLLER;
+ const int NUM_SLOTS = 61;
+ const int GATE_POS = -1;
+const int FIRST_POS_BELT2 = -1;
+const int LAST_POS_BELT2 = -1;
+const int RULE_CONTROLLER = 10;
 
 /** Change this to modify number of stations and sensors **/
-            const int NUM_STATIONS;
-            const int NUM_IN_SENSORS;
-            const int NUM_OUT_SENSORS;
+            const int NUM_STATIONS = 3;
+            const int NUM_IN_SENSORS = 3;
+            const int NUM_OUT_SENSORS = 3;
 /****************************************************************/
 
 const int TAU = 5000;

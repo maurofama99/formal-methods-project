@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int NUM_PIECES;
-const int PROCESSING_MEAN_S1;
-const int PROCESSING_VAR_S1;
-const int PROCESSING_MEAN_S2;
-const int PROCESSING_VAR_S2;
-const int PROCESSING_MEAN_S3;
-const int PROCESSING_VAR_S3;
-const int ERROR_PROB_S1;
-const int ERROR_PROB_S2;
-const int ERROR_PROB_S3;
-const int ERROR_PROB_OUTS1;
-const int ERROR_PROB_OUTS2;
-const int ERROR_PROB_OUTS3;
-const int SPEED;
+	<declaration>const int NUM_PIECES = 10;
+const int PROCESSING_MEAN_S1 = 10;
+const int PROCESSING_VAR_S1 = 2;
+const int PROCESSING_MEAN_S2 = 150;
+const int PROCESSING_VAR_S2 = 5;
+const int PROCESSING_MEAN_S3 = 10;
+const int PROCESSING_VAR_S3 = 2;
+const int ERROR_PROB_S1 = 1;
+const int ERROR_PROB_S2 = 1;
+const int ERROR_PROB_S3 = 1;
+const int ERROR_PROB_OUTS1 = 1;
+const int ERROR_PROB_OUTS2 = 1;
+const int ERROR_PROB_OUTS3 = 120;
+const int SPEED = 5;
  
-const int NUM_SLOTS;
-const int GATE_POS;
-const int FIRST_POS_BELT2;
-const int LAST_POS_BELT2;
-const int RULE_CONTROLLER;
+ const int NUM_SLOTS = 60;
+ const int GATE_POS = -1;
+const int FIRST_POS_BELT2 = -1;
+const int LAST_POS_BELT2 = -1;
+const int RULE_CONTROLLER = 10;
 
 /** Change this to modify number of stations and sensors **/
-            const int NUM_STATIONS;
-            const int NUM_IN_SENSORS;
-            const int NUM_OUT_SENSORS;
+            const int NUM_STATIONS = 3;
+            const int NUM_IN_SENSORS = 3;
+            const int NUM_OUT_SENSORS = 3;
 /****************************************************************/
 
-const int TAU = 5000;
+const int TAU = 10000;
 typedef int[0, NUM_STATIONS-1] id_s;
 typedef int[0, NUM_IN_SENSORS-1] id_sens;
 typedef int[0, NUM_OUT_SENSORS-1] id_outsens;
@@ -66,15 +66,15 @@ void initializer() {
 
     int i;
 
-    out_sensors[42] = 1;
+    out_sensors[10] = 1;
     in_sensors[12] = 1;
     stations[14] = 1;
     previous_station[0] = 30;
     //max_len_queue[0] = abs(12 - 30) + 1;
 
-    out_sensors[18] = 2;
-    in_sensors[22] = 2;
-    stations[24] = 2;
+    out_sensors[16] = 2;
+    in_sensors[20] = 2;
+    stations[22] = 2;
     previous_station[1] = 14;
     //max_len_queue[1] = abs(20 - 14) + 1;
     
@@ -85,7 +85,7 @@ void initializer() {
     //max_len_queue[2] = abs(28 - 30) + 1;
 
 
-    for ( i = 31; i &lt; NUM_PIECES+31; i++ ){
+    for ( i = 30; i &lt; NUM_PIECES+30; i++ ){
         belt[i] = 1;
     }
 
@@ -733,8 +733,8 @@ out_sensor1, out_sensor2, out_sensor3;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=TAU] ([] forall (i:id_s) len_queue[i] &lt;= max_len_queue[i])</formula>
-			<comment>no queue ever exceeds the maximum allowed length</comment>
+			<formula>Pr[&lt;=TAU] ([] (((station1.FREE || station1.AFTER_PROCESSING) imply !sensor1.BUSY) &amp;&amp; (sensor1.BUSY imply !(station1.FREE || station1.AFTER_PROCESSING))) &amp;&amp; (((station2.FREE || station2.AFTER_PROCESSING) imply !sensor2.BUSY) &amp;&amp; (sensor2.BUSY imply !(station2.FREE || station2.AFTER_PROCESSING))) &amp;&amp; (((station3.FREE || station3.AFTER_PROCESSING) imply !sensor3.BUSY) &amp;&amp; (sensor3.BUSY imply !(station3.FREE || station3.AFTER_PROCESSING))) &amp;&amp; (!(station1.WAIT_CHECK &amp;&amp; out_sensor2.WAIT_CHECK)) &amp;&amp; (!(station2.WAIT_CHECK &amp;&amp; out_sensor3.WAIT_CHECK)) &amp;&amp; (!(station3.WAIT_CHECK &amp;&amp; out_sensor1.WAIT_CHECK)))</formula>
+			<comment></comment>
 		</query>
 	</queries>
 </nta>
