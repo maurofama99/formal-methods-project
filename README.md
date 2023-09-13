@@ -15,5 +15,5 @@ Mindstorms production plant. The work has two main outputs: an Automata-
 based model of the plant and a formal verification experimental campaign
 highlighting relevant features of the system.
 
-![Detailed project description and requirements](https://github.com/maurofama99/formal-methods-project/blob/main/project_description.pdf)
-![Final Report of the project](https://github.com/maurofama99/formal-methods-project/blob/main/report/project_report.pdf)
+[Detailed project description and requirements](https://github.com/maurofama99/formal-methods-project/blob/main/project_description.pdf) \
+[Final Report of the project](https://github.com/maurofama99/formal-methods-project/blob/main/report/project_report.pdf)
