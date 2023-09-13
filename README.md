@@ -1,4 +1,4 @@
-# FORMAL DIGITAL TWIN OF A LEGO MINDSTORMS PRODUCTION PLANT
+# Formal Digital Twin of a Lego Mindstorms production plant
 A Digital Twin (DT) is the virtual replica of an actual Cyber-Physical System
 (CPS). DTs accurately replicate relevant behavioral aspects of a CPS. The
 purpose of a DT is to perform computations meant to improve the performance
